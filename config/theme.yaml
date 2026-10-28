@@ -3,9 +3,10 @@
 # La mise en page reprend la structure de la charte de référence (bandeau de couleur avec
 # logo en réserve blanche et motif de formes, rubriques numérotées dans une arche, encadrés
 # clairs, logo couleurs en bas et centré). Les couleurs sont celles du logo Carrefour
-# Property : le violet #8D2562 est la couleur exacte du logo ; les autres sont des tons de
-# ce même violet (plus foncé pour les titres, plus clair pour les encadrés) et des gris
-# neutres pour le texte. Aucune autre couleur n'a été inventée. Mode d'emploi : docs/theme.md.
+# Property : le violet #8D2562 est la couleur exacte du logo (bandeau, titres, Une), avec
+# un ton plus foncé pour les titres et des gris neutres pour le texte. Les rubriques
+# reçoivent chacune une couleur d'accent de la palette « violet et terre » (terracotta,
+# bleu canard, ocre, olive, taupe), sur des encadrés crème. Mode d'emploi : docs/theme.md.
 # Après modification, ouvrez l'écran « Thème » de l'application : il vérifie le fichier et
 # les contrastes.
 #
@@ -31,25 +32,25 @@ colors:
   muted: "#666666"
   # Fond : reste blanc (impression et e-mail).
   background: "#FFFFFF"
-  # Ton très clair du violet : encadrés (Une, sommaire, calendrier...).
-  surface: "#F7ECF2"
-  # Séparateurs fins (ton clair du violet).
-  border: "#E6CFDC"
-  # Badge « Transaction » (article qui annonce une transaction) : fond clair, texte foncé.
-  highlight: "#E9C6DA"
-  highlight_text: "#5E1741"
+  # Crème : encadrés (Une, sommaire, calendrier...).
+  surface: "#F7F2EC"
+  # Séparateurs fins (sable).
+  border: "#E3D8CC"
+  # Badge « Transaction » (article qui annonce une transaction) : sable clair, texte brun.
+  highlight: "#F6E2C8"
+  highlight_text: "#7A3A12"
 
-# Couleur d'accent de chaque rubrique (formes, numéros, filets) : tons du violet du logo.
-# Le numéro est écrit en blanc ou en violet foncé, selon ce qui contraste le mieux.
+# Couleur d'accent de chaque rubrique (formes, numéros, filets), palette « violet et
+# terre ». Le numéro est écrit en blanc ou en violet foncé, selon ce qui contraste le mieux.
 section_colors:
-  une: "#8D2562"
-  rubrique_1: "#5E1741"
-  rubrique_2: "#B2478A"
-  rubrique_3: "#8D2562"
-  rubrique_4: "#C97BAE"
-  rubrique_5: "#E0B3CC"
-  rubrique_6: "#5E1741"
-  rubrique_7: "#B2478A"
+  une: "#8D2562"        # violet du logo
+  rubrique_1: "#C65A2E" # terracotta : actualités de l'immobilier logistique
+  rubrique_2: "#2E6E7E" # bleu canard : acteurs du marché
+  rubrique_3: "#B8860B" # ocre doré : réglementation
+  rubrique_4: "#8D2562" # violet du logo : visites d'entrepôts
+  rubrique_5: "#6B8E23" # olive : calendrier
+  rubrique_6: "#8C6D5B" # taupe : congés et absences
+  rubrique_7: "#5E1741" # violet foncé : documents utiles
 
 fonts:
   # Polices système uniquement : Century Gothic (installée avec Office), puis équivalents.

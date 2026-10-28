@@ -1,4 +1,4 @@
-# Thème de la newsletter : les couleurs du logo Carrefour Property
+# Thème de la newsletter : le violet du logo Carrefour Property et une palette terre
 
 Toute la charte graphique de la newsletter tient dans un seul fichier :
 **`config/theme.yaml`**. Les gabarits (`news_property/templates/newsletter/_*.html`) et les
@@ -13,9 +13,11 @@ Aucune charte Carrefour Property n'a été fournie. Le thème reprend donc :
   bandeau de couleur avec logo en réserve blanche et motif de formes géométriques (arche,
   nœud, heptagone), rubriques numérotées « 01 » dans une arche, encadrés clairs, titres en
   capitales avec filet court, logo couleurs en bas et centré ;
-- les **couleurs du logo Carrefour Property** fourni : le violet `#8D2562` est la couleur
-  exacte du logo (mesurée sur l'image). Les autres couleurs sont des tons de ce même violet
-  et des gris neutres. Rien d'autre n'a été inventé.
+- la **couleur du logo Carrefour Property** fourni : le violet `#8D2562` est la couleur
+  exacte du logo (mesurée sur l'image), utilisée pour le bandeau, les titres et la Une ;
+- une palette d'accents « violet et terre » choisie pour les rubriques (terracotta, bleu
+  canard, ocre doré, olive, taupe), sur des encadrés crème, pour que chaque rubrique ait sa
+  couleur sans concurrencer le violet du logo.
 
 | Clé | Valeur | Origine |
 | --- | --- | --- |
@@ -24,10 +26,16 @@ Aucune charte Carrefour Property n'a été fournie. Le thème reprend donc :
 | `colors.text` | `#3F3F3F` | gris foncé neutre (texte courant) |
 | `colors.muted` | `#666666` | gris moyen neutre (sources, dates, légendes) |
 | `colors.background` | `#FFFFFF` | blanc (impression et e-mail) |
-| `colors.surface` | `#F7ECF2` | ton très clair du violet (encadrés) |
-| `colors.border` | `#E6CFDC` | ton clair du violet (séparateurs) |
-| `colors.highlight` / `highlight_text` | `#E9C6DA` / `#5E1741` | badge « Transaction » |
-| `section_colors.*` | tons du violet | accent de la Une et de chaque rubrique |
+| `colors.surface` | `#F7F2EC` | crème (encadrés) |
+| `colors.border` | `#E3D8CC` | sable (séparateurs) |
+| `colors.highlight` / `highlight_text` | `#F6E2C8` / `#7A3A12` | badge « Transaction » (sable clair, texte brun) |
+| `section_colors.une`, `rubrique_4` | `#8D2562` | violet du logo (Une, visites d'entrepôts) |
+| `section_colors.rubrique_1` | `#C65A2E` | terracotta (actualités de l'immobilier logistique) |
+| `section_colors.rubrique_2` | `#2E6E7E` | bleu canard (acteurs du marché) |
+| `section_colors.rubrique_3` | `#B8860B` | ocre doré (réglementation) |
+| `section_colors.rubrique_5` | `#6B8E23` | olive (calendrier) |
+| `section_colors.rubrique_6` | `#8C6D5B` | taupe (congés et absences) |
+| `section_colors.rubrique_7` | `#5E1741` | violet foncé (documents utiles) |
 
 Si la communication fournit une charte Carrefour Property, remplacez ces valeurs par
 celles de la charte : le fichier est commenté et l'écran **Thème** vérifie le résultat.
@@ -35,9 +43,10 @@ celles de la charte : le fichier est commenté et l'écran **Thème** vérifie l
 ### Contrastes
 
 Le blanc sur le violet du logo atteint 8,2:1 : le bandeau peut porter du texte courant.
-Les titres et liens en violet foncé font 12,6:1 sur blanc, le texte courant 10,4:1. Le
-turquoise, l'orange et le jaune de la charte de référence ne sont pas repris : ils ne font
-pas partie des tons du logo.
+Les titres et liens en violet foncé font 12,6:1 sur blanc, le texte courant 10,4:1. Sur
+chaque couleur d'accent, le numéro de rubrique est écrit en blanc ou en violet foncé selon
+ce qui contraste le mieux (au moins 3,8:1 avec cette palette ; sur l'ocre doré, c'est le
+violet foncé). L'écran Thème affiche toutes ces valeurs.
 
 ### Polices
 

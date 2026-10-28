@@ -544,7 +544,7 @@ Le format est documenté, champ par champ, dans `config/sources.example.yaml`.
 Tout ce qui relève de la charte graphique est dans **`config/theme.yaml`** : nom, phrase
 d'accroche, couleurs, couleur de chaque rubrique, polices, logos, pied de page et titres des
 rubriques. Le thème reprend la structure de la charte de référence (News Franchise) avec les
-**couleurs du logo Carrefour Property** (violet `#8D2562` et ses tons). Détail des choix, et
+**couleurs du logo Carrefour Property** (violet `#8D2562`) complétées par une palette « violet et terre » pour les rubriques. Détail des choix, et
 comment modifier une valeur : [`docs/theme.md`](docs/theme.md).
 
 L'écran **Thème** (bouton sur la page d'accueil) affiche le thème en lecture seule :
@@ -610,7 +610,7 @@ NewsProperty/
 │   ├── regles_detection.yaml # Règles « transaction » et surface
 │   ├── limites.yaml        # Limites éditoriales par rubrique
 │   ├── sources.example.yaml  # Format documenté de config/sources.yaml
-│   ├── theme.yaml          # Charte graphique de la newsletter (couleurs du logo)
+│   ├── theme.yaml          # Charte graphique de la newsletter (violet du logo et terre)
 │   └── assets/             # Logos Carrefour Property (couleurs, réserve blanche)
 ├── docs/
 │   ├── data-model.md       # Modèle de données et procédure de migration

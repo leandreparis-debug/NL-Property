@@ -75,7 +75,7 @@ def test_large_text_uses_the_3_to_1_minimum(tmp_path: Path) -> None:
 def test_section_number_color_is_the_most_readable() -> None:
     theme = load_theme()
     assert theme.accent("rubrique_1").on_color == "#FFFFFF"  # sur violet foncé
-    assert theme.accent("rubrique_5").on_color == "#5E1741"  # sur violet clair
+    assert theme.accent("rubrique_3").on_color == "#5E1741"  # sur ocre doré (clair)
     assert all(check.ok for check in theme.contrast_checks())
 
 
@@ -93,7 +93,7 @@ def test_invalid_section_color_and_missing_font(tmp_path: Path) -> None:
 def test_theme_css_variables_come_from_theme() -> None:
     css = load_theme().css_variables()
     assert "--cp-primary: #8D2562;" in css
-    assert "--cp-highlight-text: #5E1741;" in css
+    assert "--cp-highlight-text: #7A3A12;" in css
     assert "--cp-font-body: 'Century Gothic'," in css
     assert "--cp-font-labels: 'Bahnschrift Condensed'," in css
 
