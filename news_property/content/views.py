@@ -397,7 +397,7 @@ def delete_absence(month: str, absence_id: int) -> ResponseReturnValue:
             absence.person_name,
             url_for("content.delete_absence", month=month, absence_id=absence_id),
             url_for("review.month", month=month, tab="absences") + f"#absence-{absence_id}",
-            "Elle sera retirée de la rubrique 5 de ce mois.",
+            "Elle sera retirée de la rubrique 6 de ce mois.",
         )
     absences.delete(get_db(), absence_id)
     flash(f"Absence supprimée : {absence.person_name}.", "success")
@@ -419,7 +419,7 @@ def save_documents(month: str) -> ResponseReturnValue:
         (
             f"{len(saved)} lien(s) enregistré(s). Testez-les avec « Ouvrir »."
             if saved
-            else "Aucun lien saisi : la rubrique 6 sera vide."
+            else "Aucun lien saisi : la rubrique 7 sera vide."
         ),
         "success",
     )

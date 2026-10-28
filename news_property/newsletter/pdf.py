@@ -95,7 +95,7 @@ def print_html(view: NewsletterView, theme: Theme, settings: Settings) -> str:
         logo_reverse_src=theme.logo_reverse.resolve().as_uri(),
         accents=accents,
         icons=icons,
-        front_icons=tuple(icons[f"rubrique_{n}"] for n in (3, 4, 1)),
+        front_icons=tuple(icons[f"rubrique_{n}"] for n in (4, 5, 1)),
         motif=Markup(motif_svg(theme.colors["background"], opacity=0.9)),
         transaction_label=TRANSACTION_LABEL,
         show_other_photos=True,

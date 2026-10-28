@@ -157,7 +157,10 @@ La collecte lit les sources activées dans `config\sources.yaml` (flux RSS des s
 activé, Google Actualités pour chaque thème puis pour chaque acteur suivi). Elle ne garde
 que les articles **publiés pendant le mois choisi** (heure de Paris) et les classe :
 
-- **rubrique 2** (les acteurs du marché) si le titre ou le résumé cite un acteur de
+- **rubrique 3** (réglementation) si le titre ou le résumé contient un terme de
+  réglementation de `config\regles_veille.yaml` (décret, loi, ICPE, permis de construire,
+  ZAN, PLU, taxe...) ;
+- **rubrique 2** (les acteurs du marché) sinon, si le titre ou le résumé cite un acteur de
   `config\acteurs.yaml` (nom ou autre écriture) ;
 - **rubrique 1** (actualités de l'immobilier logistique) sinon, s'il contient un terme de
   `config\regles_veille.yaml` (entrepôt, plateforme logistique, parc logistique...) ;
@@ -193,7 +196,7 @@ S'il manque, la collecte ne démarre pas et l'application explique comment le cr
 
 | Ligne | Signification |
 |---|---|
-| Articles ajoutés, rubrique 1 / 2 | Nouveaux articles enregistrés, prêts à être relus |
+| Articles ajoutés, rubrique 1 / 2 / 3 | Nouveaux articles enregistrés, prêts à être relus |
 | Doublons ignorés | Article déjà présent ce mois-ci : même lien (après nettoyage des paramètres `utm_*`...) ou titre quasi identique pour le même acteur |
 | Articles hors période | Publiés en dehors du mois choisi |
 | Articles sans date | Le flux ne donne pas de date : écartés, faute de pouvoir vérifier le mois |
@@ -216,6 +219,7 @@ site n'a pas répondu à temps », « Le site a refusé l'accès (HTTP 403) »).
 
 Les listes de mots-clés sont dans **`config\regles_veille.yaml`** (commenté) :
 
+- `regulation_terms` : termes qui envoient un article en rubrique 3 (réglementation) ;
 - `topic_terms` : termes qui envoient un article en rubrique 1 ;
 - `exclusions` : expressions à ne pas compter (« entrepôt de données », « logistique
   militaire »...).
@@ -251,9 +255,10 @@ dans la newsletter, de corriger et d'ordonner.
    ancien, avec leur statut (Brouillon, Relue, Exportée) et le nombre d'articles retenus.
    Cliquez sur **Relire** devant un mois, ou choisissez un mois puis **Ouvrir ou créer ce
    mois**.
-2. **Sept onglets** : *Une*, puis les deux rubriques de veille *1. Immobilier
-   logistique* et *2. Acteurs du marché*, puis le contenu interne *3. Visites
-   d'entrepôts*, *4. Calendrier*, *5. Congés et absences* et *6. Documents utiles* (voir
+2. **Huit onglets** : *Une*, puis les trois rubriques de veille *1. Immobilier
+   logistique*, *2. Acteurs du marché* et *3. Réglementation*, puis le contenu interne
+   *4. Visites d'entrepôts*, *5. Calendrier*, *6. Congés et absences* et *7. Documents
+   utiles* (voir
    [Contenu interne](#contenu-interne)). Chaque onglet affiche un compteur
    « retenus / limite ». Il passe **en orange** quand la limite est dépassée : c'est un
    avertissement, rien n'est bloqué. Un rappel indique que la version imprimée doit tenir
@@ -284,8 +289,8 @@ dans la newsletter, de corriger et d'ordonner.
    impossible...), la page revient avec **toute votre saisie** et le message à côté du champ
    à corriger.
 9. **Changer de rubrique** (dans **Modifier**) : **Déplacer vers la rubrique 2** (l'acteur
-   est alors obligatoire) ou **vers la rubrique 1**. L'article se place en fin de la rubrique
-   choisie.
+   est alors obligatoire), **vers la rubrique 1** ou **vers la rubrique 3** (réglementation).
+   L'article se place en fin de la rubrique choisie.
 10. **Supprimer...** demande une confirmation, puis efface l'article. Pour l'écarter
     simplement, préférez « Ne plus retenir ».
 11. **+ Ajouter un article à la main** : collez le lien d'un article trouvé vous-même, puis
@@ -308,7 +313,8 @@ clavier : touche Tab, avec un lien « Aller au contenu » en premier.
 ### Limites par rubrique
 
 Les limites sont dans **`config\limites.yaml`** (commenté) : rubrique 1 = 6, rubrique 2 =
-8, visites = 4 (3 photos par visite), événements = 8, absences = 12, pages = 4 au départ. Modifiez le fichier puis
+8, rubrique 3 = 4, visites = 4 (3 photos par visite), événements = 8, absences = 12,
+pages = 4 au départ. Modifiez le fichier puis
 rechargez la page : inutile de relancer l'application. Si le fichier est absent, ces valeurs
 s'appliquent ; s'il est invalide, un message l'indique en haut de la page.
 
@@ -322,11 +328,11 @@ les onglets de la relecture (**Accueil → Contenu interne** ouvre directement l
 ### Une
 
 L'onglet **Une** affiche les trois chiffres du mois : visites d'entrepôts, rendez-vous à
-venir, actualités retenues (rubriques 1 et 2). Ils sont **calculés automatiquement** à
+venir, actualités retenues (rubriques 1 à 3). Ils sont **calculés automatiquement** à
 partir des autres onglets et ne se saisissent pas. Chaque chiffre mène à l'onglet qui le
 nourrit.
 
-### 3. Visites d'entrepôts
+### 4. Visites d'entrepôts
 
 1. **+ Ajouter une visite d'entrepôt**, puis remplissez **Site visité** et **Lieu**
    (obligatoires), **Date de la visite**, **Propriétaire ou exploitant**, **Surface (m²)**
@@ -345,7 +351,7 @@ nourrit.
 4. **⤒ ↑ ↓ ⤓** ordonnent les visites ; **Supprimer...** efface une visite avec ses
    photos, après confirmation.
 
-### 4. Calendrier
+### 5. Calendrier
 
 **+ Ajouter un rendez-vous au calendrier** : **Titre** (obligatoire), **Date** et **Date
 de fin** (facultatives, la fin ne peut pas précéder le début), **Lieu**, **Résumé** (jusqu'à
@@ -353,13 +359,13 @@ de fin** (facultatives, la fin ne peut pas précéder le début), **Lieu**, **R�
 remet la liste dans l'ordre chronologique (les rendez-vous sans date passent en fin) ; les
 flèches permettent un ordre à la main.
 
-### 5. Congés et absences
+### 6. Congés et absences
 
 **+ Ajouter un congé ou une absence** : **Nom** et **Du** (obligatoires), **Au**
 (facultatif, jamais avant le début), **Motif** court (congés, formation, déplacement...),
 puis **Ajouter**. **Classer par date** et flèches comme pour le calendrier.
 
-### 6. Documents utiles
+### 7. Documents utiles
 
 Six liens au plus, chacun avec un **Libellé** (sinon « Voir le document ») et une
 **Adresse du document** qui doit commencer par `http://` ou `https://` (SharePoint, Drive,
@@ -600,7 +606,7 @@ NewsProperty/
 │   └── appsscript.json     # Manifeste du script (service Gmail API)
 ├── config/
 │   ├── acteurs.yaml        # Référentiel des acteurs suivis (immobilier logistique)
-│   ├── regles_veille.yaml  # Mots-clés de tri de la veille (rubrique 1, exclusions)
+│   ├── regles_veille.yaml  # Mots-clés de tri de la veille (rubriques 1 et 3, exclusions)
 │   ├── regles_detection.yaml # Règles « transaction » et surface
 │   ├── limites.yaml        # Limites éditoriales par rubrique
 │   ├── sources.example.yaml  # Format documenté de config/sources.yaml
@@ -625,7 +631,7 @@ NewsProperty/
 │   ├── actor_catalog.py    # Lecture et validation de config/acteurs.yaml
 │   ├── db/
 │   │   ├── connection.py   # Connexion SQLite, migrations, intégration Flask
-│   │   └── migrations/     # 0001_initial.sql, 0002_internal_content.sql...
+│   │   └── migrations/     # 0001_initial.sql, 0002_internal_content.sql, 0003_...
 │   ├── repositories/       # Fonctions d'accès aux données, une par table principale
 │   ├── http_client.py      # Client HTTP poli (reprises, débit, robots.txt)
 │   ├── sources/

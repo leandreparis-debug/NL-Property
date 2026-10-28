@@ -319,6 +319,17 @@ def test_change_rubric(web: FlaskClient, conn: sqlite3.Connection, newsletter: N
     )
     assert "Rubrique de destination invalide" in html_of(web.get(f"{BASE}/rubrique-2"))
 
+    # Vers la rubrique 3 (réglementation) : l'acteur éventuel est conservé.
+    post_form(web, f"{BASE}/articles/{moving.id}/rubrique", {"cible": "3"})
+    regulated = articles.get(conn, moving.id)  # type: ignore[arg-type]
+    assert regulated is not None and regulated.rubric == 3
+    assert regulated.actor_label == "Foncière Locale" and regulated.url == moving.url
+    assert _order(conn, newsletter, 3) == ["Article à reclasser"]
+    page = html_of(web.get(f"{BASE}/rubrique-3"))
+    assert "Article déplacé en fin de Rubrique 3" in page
+    assert "Déplacer vers la Rubrique 1" in page and "Déplacer vers la rubrique 2" in page
+    assert "3. Réglementation" in page and "1/4" in page
+
 
 def test_remove_detected_transaction_becomes_manual(
     web: FlaskClient, conn: sqlite3.Connection, newsletter: Newsletter

@@ -148,12 +148,14 @@ def test_view_keeps_only_retained_articles_in_order(
 ) -> None:
     _fill(conn, newsletter)
     view = build_newsletter_view(conn, "2026-10", settings)
-    s1, s2, s3, s4, s5, s6 = view.sections
+    s1, s2, s3, s4, s5, s6, s7 = view.sections
     assert [item.title for item in s1.items] == ["Titre 1", "Titre 3"]
     assert s1.items[0].date_label == "1er octobre 2026"
     assert s2.items[0].transaction is True and s2.items[0].surface_label == "40 000 m²"
     assert s1.items[0].surface_label is None
-    assert not any(s.hidden for s in view.sections)
+    # Pas d'article de réglementation : seule la rubrique 3 est masquée.
+    assert [s.hidden for s in view.sections] == [False, False, True, False, False, False, False]
+    s3, s4, s5, s6 = s4, s5, s6, s7
     assert view.month_label == "Octobre 2026"
     # Visite : photo principale d'abord, surface et date en français.
     visit = s3.items[0]
@@ -185,7 +187,7 @@ def test_view_hides_empty_sections_and_counts_toc(
     events.add(conn, Event(nid, "Comité"))
     absences.add(conn, Absence(nid, "Marc D.", date(2026, 11, 12)))
     view = build_newsletter_view(conn, "2026-10", settings)
-    assert [s.number for s in view.visible_sections] == [2, 4, 5]
+    assert [s.number for s in view.visible_sections] == [2, 5, 6]
     # Numéros affichés sans trou quand une rubrique vide est masquée.
     assert [s.display_number for s in view.visible_sections] == [1, 2, 3]
     assert [(e.number, e.title, e.count_label) for e in view.toc] == [
@@ -193,8 +195,8 @@ def test_view_hides_empty_sections_and_counts_toc(
         (2, "Calendrier à venir", "1 rendez-vous"),
         (3, "Congés et absences de l'équipe", "1 absence"),
     ]
-    assert view.sections[3].items[0].date_label is None
-    assert view.sections[4].items[0].period_label == "Le 12 novembre 2026"
+    assert view.sections[4].items[0].date_label is None
+    assert view.sections[5].items[0].period_label == "Le 12 novembre 2026"
 
 
 def test_front_page_matches_front_page_figures(
@@ -214,7 +216,7 @@ def test_front_page_matches_front_page_figures(
     ]
     # Pas de lien vers la rubrique des visites (vide, donc absente) ; les actualités
     # renvoient vers la première rubrique d'articles publiée (ici la 2).
-    assert [f.anchor for f in view.front] == [None, "rubrique-4", "rubrique-2"]
+    assert [f.anchor for f in view.front] == [None, "rubrique-5", "rubrique-2"]
 
 
 def test_empty_newsletter_raises_clear_error(

@@ -18,7 +18,8 @@ MONTH_PATTERN = re.compile(r"^(\d{4})-(0[1-9]|1[0-2])$")
 NEWSLETTER_STATUSES = ("draft", "reviewed", "exported")
 RUBRIC_MARKET = 1  # actualités de l'immobilier logistique
 RUBRIC_ACTORS = 2  # les acteurs du marché (article citant un acteur suivi)
-ARTICLE_RUBRICS = (RUBRIC_MARKET, RUBRIC_ACTORS)
+RUBRIC_REGULATION = 3  # réglementation (loi, décret, ICPE, urbanisme, fiscalité...)
+ARTICLE_RUBRICS = (RUBRIC_MARKET, RUBRIC_ACTORS, RUBRIC_REGULATION)
 RUN_STATUSES = ("running", "success", "partial", "failed")
 RUN_FINAL_STATUSES = ("success", "partial", "failed")
 BODY_TEXT_MAX_LENGTH = 20_000
@@ -124,7 +125,8 @@ class Actor:
 
 @dataclass
 class Article:
-    """Actualité de veille (rubrique 1 : immobilier logistique ; rubrique 2 : acteurs).
+    """Actualité de veille (rubrique 1 : immobilier logistique ; rubrique 2 : acteurs ;
+    rubrique 3 : réglementation).
 
     url est l'adresse réelle de l'article d'origine (obligatoire). position=None à l'ajout
     signifie « à la fin de la rubrique ».
@@ -165,7 +167,7 @@ class Article:
             )
         self.transaction_evidence = clip_evidence(self.transaction_evidence)
         if self.rubric not in ARTICLE_RUBRICS:
-            raise ValueError(f"Rubrique d'article invalide : {self.rubric!r} (1 ou 2).")
+            raise ValueError(f"Rubrique d'article invalide : {self.rubric!r} (1, 2 ou 3).")
         self.title = _require_text(self.title, "titre")
         self.source_name = _require_text(self.source_name, "source")
         self.url = validate_url(self.url)
@@ -208,7 +210,7 @@ class CollectionRun:
 # --------------------------------------------------------------------------- contenu interne
 
 DEFAULT_DOCUMENT_LABEL = "Voir le document"
-MAX_DOCUMENT_LINKS = 6  # rubrique 6 : jusqu'à 6 documents utiles
+MAX_DOCUMENT_LINKS = 6  # rubrique 7 : jusqu'à 6 documents utiles
 DOCUMENT_LABEL_MAX_LENGTH = 100
 
 
@@ -236,7 +238,7 @@ def validate_photo_file_name(file_name: str) -> str:
 
 @dataclass
 class Visit:
-    """Visite d'entrepôt du mois (rubrique 3, saisie interne)."""
+    """Visite d'entrepôt du mois (rubrique 4, saisie interne)."""
 
     newsletter_id: int
     site_name: str
@@ -279,7 +281,7 @@ class VisitPhoto:
 
 @dataclass
 class Event:
-    """Événement du calendrier à venir (rubrique 4, saisie interne)."""
+    """Événement du calendrier à venir (rubrique 5, saisie interne)."""
 
     newsletter_id: int
     title: str
@@ -300,7 +302,7 @@ class Event:
 
 @dataclass
 class Absence:
-    """Congé ou absence d'un membre de l'équipe (rubrique 5, saisie interne)."""
+    """Congé ou absence d'un membre de l'équipe (rubrique 6, saisie interne)."""
 
     newsletter_id: int
     person_name: str
@@ -322,7 +324,7 @@ class Absence:
 
 @dataclass
 class DocumentLink:
-    """Lien vers un document utile (rubrique 6), par exemple un tableau de bord partagé.
+    """Lien vers un document utile (rubrique 7), par exemple un tableau de bord partagé.
 
     position va de 1 à 6 ; label None = « Voir le document ». Seul le format de l'URL est
     vérifié (http/https) : le lien, souvent interne, n'est jamais appelé.

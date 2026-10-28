@@ -68,7 +68,8 @@ def test_demo_refuses_to_overwrite_unless_reset(
 def test_demo_fills_every_section(app: Flask, conn: sqlite3.Connection, settings: Settings) -> None:
     assert demo.main([], settings=settings, out=lambda _: None) == 0
     view = build_newsletter_view(conn, "2000-01", settings, load_theme())
-    assert [s.display_number for s in view.sections] == [1, 2, 3, 4, 5, 6]
+    assert [s.display_number for s in view.sections] == [1, 2, 3, 4, 5, 6, 7]
+    assert [a.title for a in view.sections[2].items][0].startswith("[DÉMO] Un décret")
     assert [f.value for f in view.front] == [2, 3, len(demo.DEMO_ARTICLES)]
     with app.app_context():
         export = build_email(conn, "2000-01", settings)

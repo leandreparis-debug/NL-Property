@@ -1,4 +1,4 @@
-"""Dépôt des événements du calendrier à venir (rubrique 4)."""
+"""Dépôt des événements du calendrier à venir (rubrique 5)."""
 
 from __future__ import annotations
 

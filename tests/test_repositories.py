@@ -75,7 +75,7 @@ def test_article_rejects_invalid_url(newsletter: Newsletter, url: str) -> None:
 def test_article_validation(newsletter: Newsletter) -> None:
     assert newsletter.id is not None
     with pytest.raises(ValueError, match="Rubrique"):
-        _article(newsletter, "https://a.example/1", rubric=3)
+        _article(newsletter, "https://a.example/1", rubric=4)
     with pytest.raises(ValueError, match="Surface"):
         Article(newsletter.id, 1, "T", "S", "https://a.example/1", surface_sqm=0)
     with pytest.raises(ValueError, match="trop long"):
@@ -123,7 +123,7 @@ def test_sql_check_blocks_direct_invalid_insert(
     with pytest.raises(sqlite3.IntegrityError, match="CHECK"):
         conn.execute(
             "INSERT INTO articles (newsletter_id, rubric, title, source_name, url, collected_at)"
-            " VALUES (?, 3, 'Titre', 'Source', 'https://a.example/', 'x')",
+            " VALUES (?, 4, 'Titre', 'Source', 'https://a.example/', 'x')",
             (newsletter.id,),
         )
     with pytest.raises(sqlite3.IntegrityError, match="CHECK"):

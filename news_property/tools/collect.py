@@ -73,6 +73,7 @@ def format_report(report: CollectionReport, examples: int = 5) -> list[str]:
         f"Bilan de la collecte {report.month} : {STATUS_LABELS.get(report.status, report.status)}",
         f"  Articles ajoutés, rubrique 1 (immobilier logistique) : {report.added_by_rubric[1]}",
         f"  Articles ajoutés, rubrique 2 (acteurs du marché)     : {report.added_by_rubric[2]}",
+        f"  Articles ajoutés, rubrique 3 (réglementation)        : {report.added_by_rubric[3]}",
         f"  Doublons ignorés          : {report.duplicates}",
         f"  Articles hors période     : {report.out_of_period}",
         f"  Articles sans date        : {report.without_date}",

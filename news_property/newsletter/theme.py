@@ -24,7 +24,7 @@ COLOR_KEYS = (
     "highlight",
     "highlight_text",
 )
-SECTION_KEYS = ("une", *(f"rubrique_{n}" for n in range(1, 7)))
+SECTION_KEYS = ("une", *(f"rubrique_{n}" for n in range(1, 8)))
 FONT_KEYS = ("body", "headings", "labels")
 MIN_CONTRAST = 4.5  # WCAG AA, texte courant
 MIN_CONTRAST_LARGE = 3.0  # WCAG AA, grand texte (≥ 24 px, ou ≥ 19 px en gras)

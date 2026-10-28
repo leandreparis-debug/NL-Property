@@ -18,6 +18,7 @@ class Limits:
 
     rubrique_1: int = 6  # Actualités de l'immobilier logistique (articles retenus)
     rubrique_2: int = 8  # Les acteurs du marché (articles retenus)
+    rubrique_3: int = 4  # Réglementation (articles retenus)
     visites: int = 4  # Visites d'entrepôts
     photos_par_visite: int = 3  # Photos par visite (refus au-delà)
     evenements: int = 8  # Calendrier à venir
@@ -25,8 +26,8 @@ class Limits:
     pages_max: int = 4  # Pages A4 de la version imprimée
 
     def for_rubric(self, rubric: int) -> int:
-        """Limite d'articles retenus pour la rubrique 1 ou 2."""
-        return self.rubrique_1 if rubric == 1 else self.rubrique_2
+        """Limite d'articles retenus pour la rubrique 1, 2 ou 3."""
+        return {1: self.rubrique_1, 2: self.rubrique_2, 3: self.rubrique_3}[rubric]
 
 
 DEFAULT_LIMITS = Limits()

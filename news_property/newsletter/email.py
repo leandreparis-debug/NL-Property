@@ -353,7 +353,7 @@ def build_email(
     motif = images.add("cp-motif", motif_png(theme.colors["background"], opacity=0.9), "png")
     shape_of = {key: SHAPES[index % len(SHAPES)] for index, key in enumerate(SECTION_KEYS)}
     # Formes du sommaire et de la Une (visites, rendez-vous, actualités).
-    used_icons = {entry.key for entry in view.toc} | {"rubrique_3", "rubrique_4", "rubrique_1"}
+    used_icons = {entry.key for entry in view.toc} | {"rubrique_4", "rubrique_5", "rubrique_1"}
     icons = {
         key: images.add(
             f"cp-icone-{key.replace('_', '-')}", shape_png(shape_of[key], accents[key].color), "png"
@@ -407,7 +407,7 @@ def build_email(
             logo_reverse_src=to(logo_reverse),
             motif_src=to(motif),
             icon_src={key: to(cid) for key, cid in icons.items()},
-            front_icon_src=tuple(to(icons[f"rubrique_{n}"]) for n in (3, 4, 1)),
+            front_icon_src=tuple(to(icons[f"rubrique_{n}"]) for n in (4, 5, 1)),
             photo_src={name: to(cid) for name, cid in photos.items()},
         )
 

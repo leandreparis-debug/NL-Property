@@ -49,6 +49,7 @@ section_colors:
   rubrique_4: "#C97BAE"
   rubrique_5: "#E0B3CC"
   rubrique_6: "#5E1741"
+  rubrique_7: "#B2478A"
 
 fonts:
   # Polices système uniquement : Century Gothic (installée avec Office), puis équivalents.
@@ -74,7 +75,8 @@ section_titles:
   une: "À la une ce mois-ci"
   rubrique_1: "Actualités de l'immobilier logistique"
   rubrique_2: "Les acteurs du marché"
-  rubrique_3: "Nos visites d'entrepôts"
-  rubrique_4: "Calendrier à venir"
-  rubrique_5: "Congés et absences de l'équipe"
-  rubrique_6: "Documents utiles"
+  rubrique_3: "Réglementation"
+  rubrique_4: "Nos visites d'entrepôts"
+  rubrique_5: "Calendrier à venir"
+  rubrique_6: "Congés et absences de l'équipe"
+  rubrique_7: "Documents utiles"

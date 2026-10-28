@@ -4,7 +4,8 @@ Usage : python -m news_property.tools.demo [--reset]
 
 Crée la newsletter du mois fictif 2000-01 (et seulement celui-ci) avec des articles
 clairement marqués « [DÉMO] », dont les liens pointent vers https://example.com/demo/...,
-deux visites d'entrepôts avec des photos générées (marquées « DÉMO »), trois rendez-vous
+deux articles de réglementation, deux visites d'entrepôts avec des photos générées
+(marquées « DÉMO »), trois rendez-vous
 au calendrier (dont un avec un résumé), trois absences et deux liens vers des documents
 utiles. Ces textes sont inventés pour la démonstration : ils ne décrivent aucun fait réel.
 La détection (transactions, surfaces) est ensuite lancée sur ce mois.
@@ -126,6 +127,22 @@ DEMO_ARTICLES: tuple[tuple[int, str | None, str, str], ...] = (
         "CBRE publie son bilan du marché logistique",
         "Exemple fictif. Le conseil dresse le bilan de l'année : volumes investis, loyers et "
         "perspectives pour les entrepôts.",
+    ),
+    (
+        3,
+        None,
+        "Un décret durcit les règles incendie des entrepôts ICPE",
+        "Exemple fictif. Un décret publié ce mois-ci renforce les exigences de sécurité "
+        "incendie des entrepôts soumis à la réglementation des installations classées, "
+        "avec un délai de mise en conformité de deux ans.",
+    ),
+    (
+        3,
+        None,
+        "Zéro artificialisation nette : ce qui change pour les projets logistiques",
+        "Exemple fictif. La loi fixe un nouveau calendrier de réduction de l'artificialisation "
+        "des sols ; les permis de construire des parcs logistiques devront justifier la "
+        "sobriété foncière du projet.",
     ),
 )
 

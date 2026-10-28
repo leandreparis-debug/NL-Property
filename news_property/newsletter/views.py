@@ -100,11 +100,11 @@ def newsletter_context(
         key: Markup(shape_svg(SHAPES[index % len(SHAPES)], accents[key].color, 22))
         for index, key in enumerate(SECTION_KEYS)
     }
-    # Chiffres de la Une : visites (rubrique 3), rendez-vous (4), actualités (1).
+    # Chiffres de la Une : visites (rubrique 4), rendez-vous (5), actualités (1).
     return {
         "accents": accents,
         "icons": icons,
-        "front_icons": tuple(icons[f"rubrique_{n}"] for n in (3, 4, 1)),
+        "front_icons": tuple(icons[f"rubrique_{n}"] for n in (4, 5, 1)),
         "motif": Markup(motif_svg(theme.colors["background"], opacity=0.9)),
         "view": view,
         "theme": theme,

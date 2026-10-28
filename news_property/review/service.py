@@ -36,7 +36,9 @@ STATUS_LABELS = {"draft": "Brouillon", "reviewed": "Relue", "exported": "Export�
 RUBRIC_TITLES = {
     1: "Rubrique 1 - Actualités de l'immobilier logistique",
     2: "Rubrique 2 - Les acteurs du marché",
+    3: "Rubrique 3 - Réglementation",
 }
+ARTICLE_RUBRIC_NUMBERS = (1, 2, 3)
 
 MAX_TITLE = 300
 MAX_EXCERPT = 1000
@@ -85,15 +87,16 @@ class Counts:
 
     selected_1: int = 0
     selected_2: int = 0
+    selected_3: int = 0
 
     @property
     def total(self) -> int:
-        """Total des articles retenus (rubriques 1 et 2)."""
-        return self.selected_1 + self.selected_2
+        """Total des articles retenus (rubriques 1 à 3)."""
+        return self.selected_1 + self.selected_2 + self.selected_3
 
     def for_rubric(self, rubric: int) -> int:
-        """Articles retenus de la rubrique 1 ou 2."""
-        return self.selected_1 if rubric == 1 else self.selected_2
+        """Articles retenus de la rubrique 1, 2 ou 3."""
+        return {1: self.selected_1, 2: self.selected_2, 3: self.selected_3}[rubric]
 
 
 @dataclass(frozen=True)
@@ -117,10 +120,12 @@ def count_selected(conn: sqlite3.Connection, newsletter_id: int) -> Counts:
         " (SELECT COUNT(*) FROM articles WHERE newsletter_id = :id AND rubric = 1"
         "  AND selected = 1) AS s1,"
         " (SELECT COUNT(*) FROM articles WHERE newsletter_id = :id AND rubric = 2"
-        "  AND selected = 1) AS s2",
+        "  AND selected = 1) AS s2,"
+        " (SELECT COUNT(*) FROM articles WHERE newsletter_id = :id AND rubric = 3"
+        "  AND selected = 1) AS s3",
         {"id": newsletter_id},
     ).fetchone()
-    return Counts(selected_1=row["s1"], selected_2=row["s2"])
+    return Counts(selected_1=row["s1"], selected_2=row["s2"], selected_3=row["s3"])
 
 
 def list_newsletters(conn: sqlite3.Connection) -> list[NewsletterSummary]:
@@ -135,7 +140,7 @@ def review_warnings(conn: sqlite3.Connection, newsletter_id: int, limits: Limits
     """Avertissements (non bloquants) avant de marquer la newsletter comme relue."""
     counts = count_selected(conn, newsletter_id)
     warnings = []
-    for rubric in (1, 2):
+    for rubric in ARTICLE_RUBRIC_NUMBERS:
         if counts.for_rubric(rubric) > limits.for_rubric(rubric):
             warnings.append(
                 f"{RUBRIC_TITLES[rubric]} : {counts.for_rubric(rubric)} articles retenus pour "
@@ -145,23 +150,23 @@ def review_warnings(conn: sqlite3.Connection, newsletter_id: int, limits: Limits
             warnings.append(f"{RUBRIC_TITLES[rubric]} : aucun article retenu, elle sera vide.")
     visit_count = len(visits.list_for_newsletter(conn, newsletter_id))
     if visit_count == 0:
-        warnings.append("Aucune visite d'entrepôt saisie : la rubrique 3 sera vide.")
+        warnings.append("Aucune visite d'entrepôt saisie : la rubrique 4 sera vide.")
     elif visit_count > limits.visites:
         warnings.append(f"Visites : {visit_count} saisies pour une limite de {limits.visites}.")
     event_count = len(events.list_for_newsletter(conn, newsletter_id))
     if event_count == 0:
-        warnings.append("Aucun rendez-vous au calendrier : la rubrique 4 sera vide.")
+        warnings.append("Aucun rendez-vous au calendrier : la rubrique 5 sera vide.")
     elif event_count > limits.evenements:
         warnings.append(
             f"Calendrier : {event_count} rendez-vous pour une limite de {limits.evenements}."
         )
     absence_count = len(absences.list_for_newsletter(conn, newsletter_id))
     if absence_count == 0:
-        warnings.append("Aucune absence saisie : la rubrique 5 sera vide.")
+        warnings.append("Aucune absence saisie : la rubrique 6 sera vide.")
     elif absence_count > limits.absences:
         warnings.append(f"Absences : {absence_count} saisies pour une limite de {limits.absences}.")
     if document_links.count(conn, newsletter_id) == 0:
-        warnings.append("Pas de lien vers un document utile : la rubrique 6 sera vide.")
+        warnings.append("Pas de lien vers un document utile : la rubrique 7 sera vide.")
     if warnings:
         warnings.append(f"Rappel : la version imprimée doit tenir en {limits.pages_max} pages A4.")
     return warnings
@@ -363,17 +368,19 @@ def change_rubric(
     form: Mapping[str, str],
     actors: Sequence[Actor],
 ) -> Article:
-    """Déplace un article vers l'autre rubrique (en fin de liste).
+    """Déplace un article vers une autre rubrique d'articles (en fin de liste).
 
     Vers la rubrique 2 (« Les acteurs du marché »), l'acteur est obligatoire : un des
-    acteurs suivis, ou « Autre » avec son nom. Vers la rubrique 1, l'article est conservé
-    tel quel, avec son acteur éventuel. Lève FormError sinon.
+    acteurs suivis, ou « Autre » avec son nom. Vers les rubriques 1 et 3, l'article est
+    conservé tel quel, avec son acteur éventuel. Lève FormError sinon.
     """
-    if target not in ("1", "2") or int(target) == article.rubric:
+    if target not in ("1", "2", "3") or int(target) == article.rubric:
         raise FormError("Rubrique de destination invalide.")
     assert article.id is not None
-    if target == "1":
-        return articles.move_to_rubric(conn, article.id, 1, article.actor_id, article.actor_label)
+    if target != "2":
+        return articles.move_to_rubric(
+            conn, article.id, int(target), article.actor_id, article.actor_label
+        )
     actor, label = _actor_choice(form, actors)
     if actor is None and label is None:
         raise FormError(

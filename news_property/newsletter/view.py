@@ -55,7 +55,7 @@ class FrontFigure:
 
 @dataclass(frozen=True)
 class ArticleItem:
-    """Fiche actualité (rubriques 1 et 2)."""
+    """Fiche actualité (rubriques 1 à 3)."""
 
     title: str
     url: str
@@ -77,7 +77,7 @@ class PhotoItem:
 
 @dataclass(frozen=True)
 class VisitItem:
-    """Visite d'entrepôt (rubrique 3) ; main_photo = photo principale."""
+    """Visite d'entrepôt (rubrique 4) ; main_photo = photo principale."""
 
     site_name: str
     location: str
@@ -96,7 +96,7 @@ class VisitItem:
 
 @dataclass(frozen=True)
 class EventItem:
-    """Rendez-vous du calendrier (rubrique 4) ; summary = résumé (plusieurs lignes
+    """Rendez-vous du calendrier (rubrique 5) ; summary = résumé (plusieurs lignes
     possibles)."""
 
     title: str
@@ -139,7 +139,7 @@ def event_rows(items: tuple[EventItem, ...]) -> tuple[tuple[EventItem, ...], ...
 
 @dataclass(frozen=True)
 class AbsenceItem:
-    """Congé ou absence (rubrique 5)."""
+    """Congé ou absence (rubrique 6)."""
 
     person: str
     period_label: str  # « Du 2 au 6 novembre 2026 », « Le 12 novembre 2026 »
@@ -148,7 +148,7 @@ class AbsenceItem:
 
 @dataclass(frozen=True)
 class DocumentItem:
-    """Lien vers un document utile (rubrique 6)."""
+    """Lien vers un document utile (rubrique 7)."""
 
     url: str
     label: str
@@ -166,7 +166,7 @@ class Section:
     renumérotées sans trou (1, 2, 3...) quand une rubrique vide est masquée. None si masquée.
     """
 
-    key: str  # rubrique_1 ... rubrique_6
+    key: str  # rubrique_1 ... rubrique_7
     number: int
     title: str
     kind: str  # articles, visits, events, absences, documents
@@ -208,7 +208,7 @@ class TocEntry:
     anchor: str
     count: int
     count_label: str
-    key: str = ""  # rubrique_1 ... rubrique_6
+    key: str = ""  # rubrique_1 ... rubrique_7
 
     @property
     def number_label(self) -> str:
@@ -234,7 +234,7 @@ class NewsletterView:
 
     @property
     def article_urls(self) -> tuple[str, ...]:
-        """Liens des articles publiés (rubriques 1 et 2), pour préparer les QR codes."""
+        """Liens des articles publiés (rubriques 1 à 3), pour préparer les QR codes."""
         return tuple(
             item.url for s in self.sections for item in s.items if isinstance(item, ArticleItem)
         )
@@ -346,10 +346,11 @@ def build_newsletter_view(
     raw_sections = (
         Section("rubrique_1", 1, titles["rubrique_1"], "articles", article_items(1)),
         Section("rubrique_2", 2, titles["rubrique_2"], "articles", article_items(2)),
-        Section("rubrique_3", 3, titles["rubrique_3"], "visits", tuple(visit_items)),
-        Section("rubrique_4", 4, titles["rubrique_4"], "events", event_items),
-        Section("rubrique_5", 5, titles["rubrique_5"], "absences", absence_items),
-        Section("rubrique_6", 6, titles["rubrique_6"], "documents", document_items),
+        Section("rubrique_3", 3, titles["rubrique_3"], "articles", article_items(3)),
+        Section("rubrique_4", 4, titles["rubrique_4"], "visits", tuple(visit_items)),
+        Section("rubrique_5", 5, titles["rubrique_5"], "events", event_items),
+        Section("rubrique_6", 6, titles["rubrique_6"], "absences", absence_items),
+        Section("rubrique_7", 7, titles["rubrique_7"], "documents", document_items),
     )
     sections: list[Section] = []
     shown = 0
@@ -378,17 +379,17 @@ def build_newsletter_view(
         FrontFigure(
             figures.visits,
             plural(figures.visits, "visite d'entrepôt", "visites d'entrepôts"),
-            anchor(3),
+            anchor(4),
         ),
         FrontFigure(
             figures.events,
             plural(figures.events, "rendez-vous à venir", "rendez-vous à venir"),
-            anchor(4),
+            anchor(5),
         ),
         FrontFigure(
             figures.articles,
             plural(figures.articles, "actualité retenue", "actualités retenues"),
-            anchor(1, 2),
+            anchor(1, 2, 3),
         ),
     )
     toc = tuple(

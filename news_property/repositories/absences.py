@@ -1,4 +1,4 @@
-"""Dépôt des congés et absences de l'équipe (rubrique 5)."""
+"""Dépôt des congés et absences de l'équipe (rubrique 6)."""
 
 from __future__ import annotations
 

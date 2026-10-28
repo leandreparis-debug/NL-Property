@@ -87,10 +87,11 @@ def test_tab_order_and_front_page(
         "Une",
         "1. Immobilier logistique",
         "2. Acteurs du marché",
-        "3. Visites d'entrepôts",
-        "4. Calendrier",
-        "5. Congés et absences",
-        "6. Documents utiles",
+        "3. Réglementation",
+        "4. Visites d'entrepôts",
+        "5. Calendrier",
+        "6. Congés et absences",
+        "7. Documents utiles",
     ]
     nav = html[html.index('aria-label="Rubriques"') :]
     positions = [nav.index(f"\n      {escape(label)}\n") for label in labels]
@@ -101,7 +102,7 @@ def test_tab_order_and_front_page(
     assert 'figure-label">visite d&#39;entrepôt<' in html  # singulier
     assert 'figure-label">actualités retenues<' in html
     assert f'href="{BASE}/visites"' in html and f'href="{BASE}/calendrier"' in html
-    assert re.search(r"3\. Visites d&#39;entrepôts\s*<span class=\"tab-count\">1/4", html)
+    assert re.search(r"4\. Visites d&#39;entrepôts\s*<span class=\"tab-count\">1/4", html)
 
 
 def test_home_internal_content_button(client: FlaskClient, conn: sqlite3.Connection) -> None:

@@ -150,6 +150,19 @@ def test_migration_0002_keeps_step_2_data(settings: Settings, tmp_path: Path) ->
         row = conn.execute("SELECT * FROM articles").fetchone()
         assert (row["title"], row["selected"], row["position"]) == ("Titre relu", 0, 4)
         assert conn.execute("SELECT COUNT(*) FROM visits").fetchone()[0] == 0
+        # Migration 0003 : la rubrique 3 (réglementation) est acceptée, pas la 4 ; les index
+        # de la table articles ont été refaits.
+        conn.execute(
+            "INSERT INTO articles (newsletter_id, rubric, title, source_name, url, collected_at)"
+            " VALUES (1, 3, 'Décret', 'Source', 'https://a.example/3', 'x')"
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            conn.execute(
+                "INSERT INTO articles (newsletter_id, rubric, title, source_name, url,"
+                " collected_at) VALUES (1, 4, 'Titre', 'Source', 'https://a.example/4', 'x')"
+            )
+        indexes = {r[1] for r in conn.execute("PRAGMA index_list('articles')").fetchall()}
+        assert {"idx_articles_rubric", "idx_articles_actor", "idx_articles_transaction"} <= indexes
         with pytest.raises(sqlite3.IntegrityError):
             conn.execute(
                 "INSERT INTO document_links (newsletter_id, position, url)"

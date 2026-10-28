@@ -25,7 +25,7 @@ def test_default_theme_loads() -> None:
     assert theme.logo.is_file() and theme.logo_reverse.is_file()
     assert theme.logo_alt == "Carrefour Property"
     assert set(theme.section_colors) == set(theme.section_titles)
-    assert set(theme.section_titles) == {"une", *(f"rubrique_{n}" for n in range(1, 7))}
+    assert set(theme.section_titles) == {"une", *(f"rubrique_{n}" for n in range(1, 8))}
     assert theme.font_body.endswith("sans-serif")
     assert theme.warnings() == []
 

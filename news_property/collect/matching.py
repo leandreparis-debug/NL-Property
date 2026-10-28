@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from news_property.collect.text import fold
-from news_property.models import RUBRIC_ACTORS, RUBRIC_MARKET, Actor
+from news_property.models import RUBRIC_ACTORS, RUBRIC_MARKET, RUBRIC_REGULATION, Actor
 
 # Limites de mot : ni lettre/chiffre avant, ni lettre/chiffre après.
 _BEFORE = r"(?<![\w])"
@@ -145,7 +145,8 @@ class TermMatcher:
 
 @dataclass(frozen=True)
 class Classification:
-    """Rubrique attribuée à une entrée, avec l'acteur (rubrique 2) ou le terme trouvé."""
+    """Rubrique attribuée à une entrée, avec l'acteur (rubrique 2) ou le terme trouvé
+    (réglementation en rubrique 3, immobilier logistique en rubrique 1)."""
 
     rubric: int
     actor: Actor | None = None
@@ -158,19 +159,26 @@ def classify(
     actors: ActorMatcher,
     topic_terms: TermMatcher,
     exclusions: TermMatcher,
+    regulation_terms: TermMatcher | None = None,
 ) -> Classification | None:
     """Classe une entrée de flux d'après son titre et son résumé.
 
-    1. Acteur suivi cité (titre d'abord, puis résumé) → rubrique 2.
-    2. Sinon, terme de l'immobilier logistique présent, une fois retirées les
-       expressions d'exclusion (« entrepôt de données »...) → rubrique 1.
-    3. Sinon → None (entrée écartée).
+    1. Terme de réglementation présent (loi, décret, ICPE, PLU...), une fois retirées les
+       expressions d'exclusion → rubrique 3.
+    2. Sinon, acteur suivi cité (titre d'abord, puis résumé) → rubrique 2.
+    3. Sinon, terme de l'immobilier logistique présent (après exclusions, « entrepôt de
+       données »...) → rubrique 1.
+    4. Sinon → None (entrée écartée).
     """
+    cleaned = exclusions.remove(f"{title} . {summary}")
+    if regulation_terms is not None:
+        term = regulation_terms.find(cleaned)
+        if term:
+            return Classification(RUBRIC_REGULATION, None, term)
     for text in (title, summary):
         found = actors.find(text)
         if found:
             return Classification(RUBRIC_ACTORS, found.actor, found.actor.name)
-    cleaned = exclusions.remove(f"{title} . {summary}")
     term = topic_terms.find(cleaned)
     if term:
         return Classification(RUBRIC_MARKET, None, term)

@@ -319,3 +319,35 @@ def test_rules_config(tmp_path: Path) -> None:
         load_rules(_write(tmp_path, "r.yaml", "topic_terms: [a]\nexclusion: [b]\n"))
     with pytest.raises(RulesConfigError, match="ligne"):
         load_rules(_write(tmp_path, "r.yaml", "topic_terms: [a\n"))
+
+
+def test_regulation_terms_win_over_actors(
+    matcher: ActorMatcher, rules: tuple[TermMatcher, TermMatcher]
+) -> None:
+    topics, exclusions = rules
+    regulation = TermMatcher(["décret", "ICPE", "zéro artificialisation nette"])
+    decree = classify(
+        "Un décret renforce les règles incendie des entrepôts",
+        "",
+        matcher,
+        topics,
+        exclusions,
+        regulation,
+    )
+    assert decree is not None and decree.rubric == 3 and decree.matched == "decret"  # replié
+    # Un acteur suivi cité dans un article réglementaire : rubrique 3 quand même.
+    mixed = classify(
+        "Prologis salue le décret sur les ICPE", "", matcher, topics, exclusions, regulation
+    )
+    assert mixed is not None and mixed.rubric == 3 and mixed.actor is None
+    # Sans terme réglementaire : classement habituel (acteur, puis thème).
+    actor = classify("Prologis livre un entrepôt", "", matcher, topics, exclusions, regulation)
+    assert actor is not None and actor.rubric == 2
+    # Les exclusions s'appliquent avant la recherche des termes réglementaires.
+    excluded = TermMatcher(["entrepôts de données", "décret sur"])
+    assert (
+        classify(
+            "Un décret sur les entrepôts de données", "", matcher, topics, excluded, regulation
+        )
+        is None
+    )

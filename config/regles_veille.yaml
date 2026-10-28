@@ -1,11 +1,13 @@
 # Règles de tri de la veille (collecte automatique).
 #
 # Chaque entrée de flux est classée ainsi :
-#   1. elle cite un acteur suivi (nom ou alias de config/acteurs.yaml)
+#   1. elle contient un des « regulation_terms » (loi, décret, ICPE, PLU...)
+#      → rubrique 3 « Réglementation » ;
+#   2. sinon, elle cite un acteur suivi (nom ou alias de config/acteurs.yaml)
 #      → rubrique 2 « Les acteurs du marché » ;
-#   2. sinon, elle contient un des « topic_terms » ci-dessous
+#   3. sinon, elle contient un des « topic_terms » ci-dessous
 #      → rubrique 1 « Actualités de l'immobilier logistique » ;
-#   3. sinon, elle est écartée (comptée dans le bilan).
+#   4. sinon, elle est écartée (comptée dans le bilan).
 # Seuls le titre et le résumé fournis par le flux sont examinés.
 #
 # Comparaison : la casse, les accents et le type d'apostrophe (' ou ’) ne comptent pas ;
@@ -42,8 +44,53 @@ topic_terms:
   - actifs logistiques
   - portefeuille logistique
 
+# Termes qui signalent un changement de réglementation autour des entrepôts (rubrique 3) :
+# textes de loi et décrets, installations classées, urbanisme et foncier, environnement et
+# énergie, fiscalité. Un article qui contient l'un d'eux va en rubrique 3, même s'il cite
+# un acteur suivi. Les sources de veille étant consacrées à la logistique, ces termes ne
+# sont pas combinés avec ceux de la rubrique 1.
+regulation_terms:
+  - réglementation
+  - réglementaire
+  - décret
+  - arrêté
+  - loi
+  - projet de loi
+  - ordonnance
+  - directive
+  - jurisprudence
+  - conseil d'état
+  - conseil constitutionnel
+  - code de l'urbanisme
+  - code de l'environnement
+  - ICPE
+  - installation classée
+  - installations classées
+  - Seveso
+  - autorisation environnementale
+  - permis de construire
+  - PLU
+  - PLUi
+  - SCoT
+  - zéro artificialisation nette
+  - ZAN
+  - artificialisation des sols
+  - décret tertiaire
+  - loi climat
+  - loi AGEC
+  - photovoltaïque obligatoire
+  - taxe d'aménagement
+  - taxe foncière
+  - fiscalité
+  - norme
+  - normes
+  - certification
+  - sprinklage
+  - sécurité incendie
+
 # Expressions qui NE comptent PAS comme immobilier logistique (faux positifs).
-# Elles sont retirées du texte avant la recherche des termes ci-dessus : un article qui ne
+# Elles sont retirées du texte avant la recherche des termes ci-dessus (rubriques 3 et 1) :
+# un article qui ne
 # parle que d'« entrepôt de données » (informatique) est écarté, mais un article qui cite
 # aussi un « parc logistique » reste en rubrique 1.
 exclusions:

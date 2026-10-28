@@ -49,7 +49,7 @@ Clock = Callable[[], datetime]
 
 TITLE_SIMILARITY = 0.9
 STALE_RUN_AFTER = timedelta(hours=3)
-RUBRICS = (1, 2)
+RUBRICS = (1, 2, 3)
 
 
 def system_clock() -> datetime:
@@ -121,6 +121,7 @@ class CollectionReport:
             "entries_read": self.entries_read,
             "added_rubric_1": self.added_by_rubric[1],
             "added_rubric_2": self.added_by_rubric[2],
+            "added_rubric_3": self.added_by_rubric[3],
             "duplicates": self.duplicates,
             "out_of_period": self.out_of_period,
             "without_date": self.without_date,
@@ -179,6 +180,7 @@ class _Context:
     actor_matcher: ActorMatcher
     topic_terms: TermMatcher
     exclusions: TermMatcher
+    regulation_terms: TermMatcher
     seen: _Seen
     link_resolution: str = "google_link_only"
     failed_feeds: int = 0
@@ -229,7 +231,12 @@ def _process_entry(ctx: _Context, entry: FeedEntry, is_google: bool, stat: Sourc
         report.out_of_period += 1
         return
     classification = classify(
-        entry.title, entry.summary, ctx.actor_matcher, ctx.topic_terms, ctx.exclusions
+        entry.title,
+        entry.summary,
+        ctx.actor_matcher,
+        ctx.topic_terms,
+        ctx.exclusions,
+        ctx.regulation_terms,
     )
     if classification is None:
         report.off_topic += 1
@@ -409,6 +416,7 @@ def run_collection(
             actor_matcher=ActorMatcher(tracked),
             topic_terms=TermMatcher(rules.topic_terms),
             exclusions=TermMatcher(rules.exclusions),
+            regulation_terms=TermMatcher(rules.regulation_terms),
             seen=seen,
             link_resolution=sources.google_news.link_resolution if sources.google_news else "",
         )

@@ -16,18 +16,21 @@ rubrique_1: 6
 # Rubrique 2 : Les acteurs du marché (articles retenus).
 rubrique_2: 8
 
-# Rubrique 3 : Nos visites d'entrepôts.
+# Rubrique 3 : Réglementation (articles retenus).
+rubrique_3: 4
+
+# Rubrique 4 : Nos visites d'entrepôts.
 visites: 4
 
-# Rubrique 3 : nombre maximal de photos par visite. Contrairement aux autres limites,
+# Rubrique 4 : nombre maximal de photos par visite. Contrairement aux autres limites,
 # celle-ci est appliquée : une photo de plus est refusée avec un message. La première photo
 # est la « photo principale », utilisée en priorité dans les exports.
 photos_par_visite: 3
 
-# Rubrique 4 : Calendrier à venir (événements).
+# Rubrique 5 : Calendrier à venir (événements).
 evenements: 8
 
-# Rubrique 5 : Congés et absences de l'équipe.
+# Rubrique 6 : Congés et absences de l'équipe.
 absences: 12
 
 # Nombre maximal de pages A4 de la version imprimée (rappel affiché pendant la relecture).

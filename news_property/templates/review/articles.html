@@ -119,11 +119,12 @@
           <button type="submit" class="btn btn-primary">Enregistrer cet article</button>
         </form>
 
+        {% for target, target_title in other_rubrics %}
         <form method="post" action="{{ url_for('review.change_rubric', month=newsletter.month, article_id=a.id) }}" class="move-rubric">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="filtre" value="{{ filtre }}">
-          <input type="hidden" name="cible" value="{{ other_rubric }}">
-          {% if other_rubric == 2 %}
+          <input type="hidden" name="cible" value="{{ target }}">
+          {% if target == 2 %}
             <span class="label">Déplacer vers la rubrique 2 - Les acteurs du marché (choisissez l'acteur) :</span>
             <label for="{{ p }}-cible-acteur" class="sr-only">Acteur pour la rubrique 2</label>
             <select id="{{ p }}-cible-acteur" name="acteur" class="actor-select" data-other="{{ p }}-cible-autre-field">
@@ -137,10 +138,10 @@
             </span>
             <button type="submit" class="btn btn-small">Déplacer vers la rubrique 2</button>
           {% else %}
-            <span class="label">Cet article ne concerne pas un acteur suivi ?</span>
-            <button type="submit" class="btn btn-small">Déplacer vers la rubrique 1 - Actualités de l'immobilier logistique</button>
+            <button type="submit" class="btn btn-small">Déplacer vers la {{ target_title }}</button>
           {% endif %}
         </form>
+        {% endfor %}
       </details>
     </article>
   {% endfor %}

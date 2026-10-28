@@ -109,7 +109,7 @@ def test_full_collection_two_sites(
     report = _run(db, settings, fetcher, sources)
 
     assert report.status == "success", report.errors
-    assert report.added_by_rubric == {1: 2, 2: 2}
+    assert report.added_by_rubric == {1: 2, 2: 2, 3: 0}
     assert report.duplicates == 2  # même URL normalisée + titre quasi identique
     assert report.out_of_period == 2  # septembre + 31/10 23h30 UTC (= novembre à Paris)
     assert report.without_date == 1
@@ -270,7 +270,7 @@ def test_google_news_link_only(
     report = _run(db, settings, fetcher, write_sources(tmp_path, [], google="google_link_only"))
 
     assert report.status == "success", report.errors
-    assert report.added_by_rubric == {1: 0, 2: 1}
+    assert report.added_by_rubric == {1: 0, 2: 1, 3: 0}
     assert report.out_of_period == 2
     # Une recherche par thème, puis une par acteur suivi.
     tracked = len(actors.list_all(db, tracked_only=True))

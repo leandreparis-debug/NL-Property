@@ -1,4 +1,4 @@
-"""Dépôt des liens vers les documents utiles (rubrique 6, jusqu'à 6 par newsletter)."""
+"""Dépôt des liens vers les documents utiles (rubrique 7, jusqu'à 6 par newsletter)."""
 
 from __future__ import annotations
 

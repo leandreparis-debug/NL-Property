@@ -1,4 +1,4 @@
-"""Dépôt des visites d'entrepôts (rubrique 3) et de leurs photos."""
+"""Dépôt des visites d'entrepôts (rubrique 4) et de leurs photos."""
 
 from __future__ import annotations
 

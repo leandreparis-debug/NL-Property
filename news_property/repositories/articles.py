@@ -1,4 +1,4 @@
-"""Dépôt des articles de veille (rubriques 1 et 2)."""
+"""Dépôt des articles de veille (rubriques 1 à 3)."""
 
 from __future__ import annotations
 

@@ -38,16 +38,17 @@ from news_property.review.service import FormError, LinkError
 
 bp = Blueprint("review", __name__, url_prefix="/newsletters")
 
-TABS = {"rubrique-1": 1, "rubrique-2": 2}
+TABS = {"rubrique-1": 1, "rubrique-2": 2, "rubrique-3": 3}
 # Onglets de l'écran du mois, dans l'ordre de la newsletter.
 TAB_LABELS = {
     "une": "Une",
     "rubrique-1": "1. Immobilier logistique",
     "rubrique-2": "2. Acteurs du marché",
-    "visites": "3. Visites d'entrepôts",
-    "calendrier": "4. Calendrier",
-    "absences": "5. Congés et absences",
-    "documents": "6. Documents utiles",
+    "rubrique-3": "3. Réglementation",
+    "visites": "4. Visites d'entrepôts",
+    "calendrier": "5. Calendrier",
+    "absences": "6. Congés et absences",
+    "documents": "7. Documents utiles",
 }
 ARTICLE_FILTERS = {
     "tous": "Tout",
@@ -191,6 +192,7 @@ def _tabs(
     numbers: dict[str, tuple[int | None, int | None]] = {
         "rubrique-1": (counts.selected_1, limits.rubrique_1),
         "rubrique-2": (counts.selected_2, limits.rubrique_2),
+        "rubrique-3": (counts.selected_3, limits.rubrique_3),
         "visites": (content["visites"], limits.visites),
         "calendrier": (content["calendrier"], limits.evenements),
         "absences": (content["absences"], limits.absences),
@@ -230,7 +232,11 @@ def _render_month(
     items = articles.list_for_rubric(conn, newsletter.id, rubric)
     context.update(
         rubric=rubric,
-        other_rubric=2 if rubric == 1 else 1,
+        other_rubrics=[
+            (number, service.RUBRIC_TITLES[number])
+            for number in service.ARTICLE_RUBRIC_NUMBERS
+            if number != rubric
+        ],
         filters=ARTICLE_FILTERS,
         filtre=chosen,
         items=_filter_articles(items, chosen),
@@ -321,7 +327,7 @@ def move_article(month: str, article_id: int) -> ResponseReturnValue:
 
 @bp.post("/<month>/articles/<int:article_id>/rubrique")
 def change_rubric(month: str, article_id: int) -> ResponseReturnValue:
-    """Déplace un article vers l'autre rubrique (en fin de liste)."""
+    """Déplace un article vers une autre rubrique d'articles (en fin de liste)."""
     newsletter = _newsletter(month)
     article = _article(newsletter, article_id)
     try:

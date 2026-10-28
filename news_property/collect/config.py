@@ -64,6 +64,7 @@ class CollectRules:
 
     topic_terms: tuple[str, ...]
     exclusions: tuple[str, ...] = ()
+    regulation_terms: tuple[str, ...] = ()  # rubrique 3 « Réglementation »
 
 
 def _read_yaml(path: Path, error: type[ConfigError], missing_hint: str) -> Any:
@@ -191,17 +192,18 @@ def _term_list(data: dict[str, Any], key: str, path: Path, required: bool) -> tu
 
 
 def load_rules(path: Path = RULES_FILE) -> CollectRules:
-    """Lit et valide config/regles_veille.yaml (topic_terms, exclusions)."""
+    """Lit et valide config/regles_veille.yaml (topic_terms, exclusions, regulation_terms)."""
     data = _read_yaml(path, RulesConfigError, "Ce fichier fait partie du projet : restaurez-le.")
     if not isinstance(data, dict):
         raise RulesConfigError(f"{path.name} : contenu invalide.")
-    unknown = sorted(set(data) - {"topic_terms", "exclusions"})
+    unknown = sorted(set(data) - {"topic_terms", "exclusions", "regulation_terms"})
     if unknown:
         raise RulesConfigError(
             f"{path.name} : clé(s) inconnue(s) {', '.join(map(str, unknown))} "
-            "(clés possibles : topic_terms, exclusions)."
+            "(clés possibles : topic_terms, exclusions, regulation_terms)."
         )
     return CollectRules(
         topic_terms=_term_list(data, "topic_terms", path, required=True),
         exclusions=_term_list(data, "exclusions", path, required=False),
+        regulation_terms=_term_list(data, "regulation_terms", path, required=False),
     )

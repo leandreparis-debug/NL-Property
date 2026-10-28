@@ -25,7 +25,7 @@ via les fonctions de `news_property/repositories/`, qui manipulent les dataclass
    (rubrique d'une newsletter...). Un ajout sans position va en fin de liste ; `reorder()`
    renumérote.
 
-## Tables (schéma v2)
+## Tables (schéma v3)
 
 ```
 newsletters ─┬─< articles >──── actors
@@ -57,12 +57,12 @@ newsletters ─┬─< articles >──── actors
 | `tracked` | INTEGER | 1 = suivi ; 0 = retiré du YAML (jamais supprimé) |
 | `case_sensitive` | INTEGER | 1 = majuscule initiale exigée lors de la détection dans les articles (noms qui sont aussi des mots courants ou sigles courts : « Argan », « GLP ») |
 
-### `articles` : actualités de veille (rubriques 1 et 2)
+### `articles` : actualités de veille (rubriques 1 à 3)
 | Colonne | Type | Règles |
 |---|---|---|
 | `id` | INTEGER | clé primaire |
 | `newsletter_id` | INTEGER | → `newsletters`, CASCADE |
-| `rubric` | INTEGER | 1 (actualités de l'immobilier logistique) ou 2 (acteurs du marché) |
+| `rubric` | INTEGER | 1 (actualités de l'immobilier logistique), 2 (acteurs du marché) ou 3 (réglementation) |
 | `actor_id` | INTEGER | → `actors`, nullable |
 | `actor_label` | TEXT | acteur « Autre » saisi à la relecture (hors référentiel), ≤ 100 caractères, nullable |
 | `title` | TEXT | obligatoire |
@@ -88,7 +88,7 @@ en français).
 
 Une ligne `running` sert aussi de verrou : une seule collecte à la fois.
 
-### `visits` : visites d'entrepôts (rubrique 3)
+### `visits` : visites d'entrepôts (rubrique 4)
 | Colonne | Type | Règles |
 |---|---|---|
 | `id` | INTEGER | clé primaire |
@@ -114,7 +114,7 @@ Le fichier image est écrit dans `<données>/photos/<mois>/` après traitement (
 EXIF, suppression des métadonnées, 1600 px au plus, JPEG). Supprimer la ligne supprime le
 fichier ; supprimer une newsletter supprime son dossier de photos.
 
-### `events` : calendrier à venir (rubrique 4)
+### `events` : calendrier à venir (rubrique 5)
 | Colonne | Type | Règles |
 |---|---|---|
 | `id` | INTEGER | clé primaire |
@@ -126,7 +126,7 @@ fichier ; supprimer une newsletter supprime son dossier de photos.
 | `summary` | TEXT | résumé, retours à la ligne conservés, ≤ 1 000 caractères, nullable |
 | `position` | INTEGER | ordre (bouton « Trier par date » renumérote) |
 
-### `absences` : congés et absences de l'équipe (rubrique 5)
+### `absences` : congés et absences de l'équipe (rubrique 6)
 | Colonne | Type | Règles |
 |---|---|---|
 | `id` | INTEGER | clé primaire |
@@ -137,7 +137,7 @@ fichier ; supprimer une newsletter supprime son dossier de photos.
 | `reason` | TEXT | motif court (congés, formation, déplacement...), nullable |
 | `position` | INTEGER | ordre (bouton « Trier par date » renumérote) |
 
-### `document_links` : documents utiles (rubrique 6)
+### `document_links` : documents utiles (rubrique 7)
 | Colonne | Type | Règles |
 |---|---|---|
 | `id` | INTEGER | clé primaire |
@@ -180,6 +180,7 @@ grouper plusieurs écritures, utiliser `with transaction(conn):`.
 |---|---|
 | `0001_initial.sql` | Schéma initial (étape 2) : `newsletters`, `actors`, `articles`, `collection_runs` |
 | `0002_internal_content.sql` | Contenu interne (étape 7) : `visits`, `visit_photos`, `events`, `absences`, `document_links` |
+| `0003_regulation_rubric.sql` | Rubrique 3 « Réglementation » : la table `articles` accepte `rubric` = 3 (table recréée, données copiées, index refaits) |
 
 ## Ajouter une migration
 

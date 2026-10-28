@@ -78,7 +78,7 @@ fichiers officiels, déposez-les dans `config/assets/` sous le même nom (ou cha
 | `logo_reverse` | Logo en réserve blanche, pour le bandeau | PNG ou JPEG (de préférence PNG transparent) |
 | `logo_alt` | Texte alternatif des logos | texte |
 | `footer_text` | Texte du pied de page | texte, 300 caractères au plus |
-| `section_titles.*` | Titre de la Une et des 6 rubriques | texte, 80 caractères au plus |
+| `section_titles.*` | Titre de la Une et des 7 rubriques | texte, 80 caractères au plus |
 
 Notes :
 
