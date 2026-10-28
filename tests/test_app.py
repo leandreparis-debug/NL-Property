@@ -27,11 +27,12 @@ def test_index(client: FlaskClient) -> None:
         assert label in html
 
 
-def test_index_links_only_the_functions_delivered(client: FlaskClient) -> None:
+def test_index_links_every_function(client: FlaskClient) -> None:
     html = html_of(client.get("/"))
-    assert 'href="/theme"' in html
-    # Les fonctions des étapes suivantes sont annoncées sans lien.
-    assert "À venir dans une prochaine étape" in html
+    for href in ("/collecte/", "/newsletters/", "/contenu-interne", "/exports", "/theme"):
+        assert f'href="{href}"' in html, href
+    # Toutes les fonctions sont livrées : plus de carte « à venir ».
+    assert "À venir dans une prochaine étape" not in html
 
 
 def test_health(client: FlaskClient) -> None:
@@ -82,14 +83,13 @@ def test_sidebar_menu_marks_the_current_section(client: FlaskClient) -> None:
     assert re.search(r'is-active" href="/theme" aria-current="page"', theme)
 
 
-def test_menu_hides_the_functions_not_delivered_yet(client: FlaskClient) -> None:
+def test_menu_lists_every_function(client: FlaskClient) -> None:
     html = html_of(client.get("/"))
     nav = html[html.index('<nav class="side-nav"') : html.index("</nav>")]
-    delivered = {"index", "collect.index", "review.index", "content.start", "newsletter.theme"}
-    for _, label, endpoint in NAV:
-        assert (label in nav) == (endpoint in delivered), label
+    for _, label, _endpoint in NAV:
+        assert label in nav, label
     assert 'href="/collecte/"' in nav and 'href="/newsletters/"' in nav
-    assert 'href="/exports"' not in nav
+    assert 'href="/exports"' in nav
 
 
 @pytest.mark.parametrize(

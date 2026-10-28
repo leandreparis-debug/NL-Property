@@ -17,13 +17,14 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 8 sur 10)** : socle technique (configuration, journal, sécurité,
+> **État actuel (étape 9 sur 10)** : socle technique (configuration, journal, sécurité,
 > page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
 > locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
 > veille, collecte de la veille, détection des transactions et des surfaces, relecture
 > des articles, contenu interne (Une, visites d'entrepôts avec photos, calendrier,
-> congés et absences, documents utiles), aperçu de la newsletter avec impression. Les
-> étapes suivantes ajoutent l'e-mail et la démonstration.
+> congés et absences, documents utiles), aperçu de la newsletter avec impression, export
+> e-mail pour Gmail (brouillon créé par un script Apps Script, version PDF à imprimer).
+> La dernière étape ajoute le mois de démonstration et les vérifications finales.
 
 ## Prérequis
 
@@ -387,6 +388,32 @@ d'articles retenus (le compteur de la relecture vous le rappelle).
 Si `config\theme.yaml` contient une erreur, l'aperçu l'indique (ligne et valeur fautives)
 au lieu de s'afficher avec de mauvaises couleurs.
 
+## Exporter l'e-mail (Gmail)
+
+L'application **prépare** l'e-mail ; un petit script Google Apps Script, lancé depuis votre
+compte Google, en fait un **brouillon Gmail**. Rien n'est envoyé automatiquement : vous
+ajoutez les destinataires, relisez et envoyez vous-même. Marche à suivre complète (dont
+l'installation du script, une seule fois) : [`docs/email.md`](docs/email.md).
+
+1. **Accueil → Exporter**, puis **Exporter** devant le mois (ou bouton **Exporter** de
+   l'écran du mois).
+2. **Préparer l'e-mail**. L'application fabrique l'e-mail (tableaux de 600 px, images
+   jointes, version texte), la version PDF à imprimer (avec Edge ou Chrome, trouvés tout
+   seuls) et le **paquet** `news-property-AAAA-MM.json`. La page affiche la taille du HTML
+   (Gmail tronque au-delà de 102 Ko, avertissement dès 92 Ko), les images jointes et
+   l'e-mail tel qu'il sera reçu.
+3. Déposez le paquet dans le dossier **News Property** de votre Google Drive : automatique
+   si `CP_DRIVE_DIR` (fichier `.env`) indique ce dossier synchronisé, sinon par le lien
+   **télécharger**.
+4. Dans le projet Apps Script **News Property**, lancez **creerBrouillon**. Le script dépose
+   le PDF dans Drive, le relie au lien « voir la version à imprimer » et crée le brouillon.
+5. Dans Gmail, dossier **Brouillons** : ajoutez les destinataires, relisez, envoyez.
+
+Les fichiers sont dans `<données>\exports\AAAA-MM\email\` (e-mail ouvrable dans un
+navigateur, message complet `.eml`, PDF, paquet). Préparer à nouveau remplace l'export
+précédent. Si aucun navigateur n'est trouvé pour le PDF, l'e-mail est préparé sans le lien
+et la page le signale : indiquez le navigateur dans `CP_BROWSER`.
+
 ## Transactions et surfaces
 
 Après chaque collecte, l'application propose automatiquement :
@@ -556,6 +583,9 @@ NewsProperty/
 ├── .gitignore
 ├── .gitattributes          # Fins de ligne (CRLF pour les .bat)
 ├── README.md
+├── apps_script/
+│   ├── brouillon_gmail.gs  # Script Google Apps Script : crée le brouillon Gmail
+│   └── appsscript.json     # Manifeste du script (service Gmail API)
 ├── config/
 │   ├── acteurs.yaml        # Référentiel des acteurs suivis (immobilier logistique)
 │   ├── regles_veille.yaml  # Mots-clés de tri de la veille (rubrique 1, exclusions)
@@ -567,6 +597,7 @@ NewsProperty/
 ├── docs/
 │   ├── data-model.md       # Modèle de données et procédure de migration
 │   ├── detection.md        # Détection des transactions et des surfaces
+│   ├── email.md            # E-mail Gmail : préparation, script, format du paquet
 │   ├── theme.md            # Thème : origine des valeurs, clés modifiables
 │   └── securite.md         # CSRF, contrôle du Host, échappement, liens non modifiables
 ├── news_property/          # Code de l'application
@@ -608,7 +639,8 @@ NewsProperty/
 │   ├── ui.py               # Menu, cartes de l'accueil, variables du thème
 │   ├── fonts.py            # Police système pour les images générées
 │   ├── newsletter/         # Thème (theme.py), formes (shapes.py), dates en français,
-│   │                       # QR codes (qr.py), vue (view.py), aperçu et pages (views.py)
+│   │                       # QR codes (qr.py), vue (view.py), e-mail (email.py),
+│   │                       # PDF (pdf.py), aperçu, export et pages (views.py)
 │   ├── templates/          # Gabarits Jinja2 (newsletter/_*.html : communs à l'aperçu
 │   │                       # et aux exports)
 │   └── static/             # style.css (application), newsletter.css (newsletter),
@@ -634,7 +666,9 @@ NewsProperty/
     ├── test_detection.py   # dont les cas étiquetés de fixtures/detection_cases.yaml
     ├── test_review.py      # Interface de relecture
     ├── test_content.py     # Contenu interne (Une, visites et photos, calendrier...)
-    └── test_newsletter.py  # Dates, vue de la newsletter, QR codes, aperçu
+    ├── test_newsletter.py  # Dates, vue de la newsletter, QR codes, aperçu
+    ├── test_email.py       # E-mail Gmail, paquet, pages d'export
+    └── test_pdf.py         # Version PDF à imprimer
 ```
 
 ## Conventions de développement

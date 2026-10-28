@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>{{ theme.name }} - {{ view.month_label }}</title>
+  <style>{{ stylesheet }}</style>
+  <style>:root { {{ theme_css }} } body.nl-page { background: #fff; }</style>
+</head>
+<body class="nl-page">
+  {% include "newsletter/_newsletter.html" %}
+</body>
+</html>

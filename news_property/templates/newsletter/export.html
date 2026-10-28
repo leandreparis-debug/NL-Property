@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Exporter {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  <p class="breadcrumb"><a href="{{ url_for('newsletter.exports') }}">Exporter</a> › {{ month_label }}</p>
+  <h1>Exporter : {{ month_label }}
+    <span class="badge status-{{ newsletter.status }}">{{ status_label }}</span></h1>
+  <p>
+    <a class="btn" href="{{ url_for('review.month_home', month=newsletter.month) }}">Revenir à la relecture</a>
+    <a class="btn" href="{{ url_for('newsletter.preview', month=newsletter.month) }}">Aperçu</a>
+  <a class="btn" href="{{ url_for('newsletter.preview', month=newsletter.month, imprimer=1) }}" target="_blank" rel="noopener">Imprimer</a>
+  </p>
+
+  <section class="export-box" aria-labelledby="email-titre">
+    <h2 id="email-titre">E-mail pour Gmail</h2>
+    <p>L'e-mail reprend le contenu de l'aperçu : articles retenus et contenu interne (visites, calendrier, absences, documents).
+      Les images sont jointes au message : rien n'est hébergé en ligne.</p>
+    <form method="post" action="{{ url_for('newsletter.export_email', month=newsletter.month) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn btn-primary">{% if info %}Préparer à nouveau l'e-mail{% else %}Préparer l'e-mail{% endif %}</button>
+    </form>
+
+    {% if info %}
+      <h3>Dernier e-mail préparé</h3>
+      <dl class="theme-list">
+        <dt>Préparé le</dt><dd>{{ info.created_at }}</dd>
+        <dt>Objet</dt><dd>{{ info.subject }}</dd>
+        <dt>Taille du HTML</dt>
+        <dd>{{ info.html_size_label }} <span class="muted">(Gmail tronque au-delà de {{ clip_limit }})</span>
+          {% if info.clipped_risk %}<span class="badge badge-unsaved">Trop près de la limite</span>{% else %}<span class="badge badge-on">OK</span>{% endif %}</dd>
+        <dt>Images jointes</dt><dd>{{ info.images_count }} ({{ info.images_size_label }})</dd>
+        <dt>Version à imprimer</dt>
+        <dd>{% if info.pdf %}<a href="{{ url_for('newsletter.export_email_pdf', month=newsletter.month, name='news-property-' ~ newsletter.month) }}" target="_blank" rel="noopener">{{ info.pdf.name }}</a>
+          <span class="muted">- ouverte par le lien « voir la version à imprimer » de l'e-mail</span>
+          {% else %}<span class="muted">aucune : l'e-mail n'a pas de lien vers la version à imprimer (voir le message plus haut)</span>{% endif %}</dd>
+        <dt>Dossier</dt><dd><code>{{ info.package.parent }}</code></dd>
+        <dt>Paquet pour Gmail</dt>
+        <dd><code>{{ info.package.name }}</code> -
+          <a href="{{ url_for('newsletter.export_email_package', month=newsletter.month) }}">télécharger</a></dd>
+      </dl>
+      <p><a class="btn" href="{{ url_for('newsletter.export_email_preview', month=newsletter.month) }}" target="_blank" rel="noopener">Ouvrir l'e-mail dans un nouvel onglet</a></p>
+      <iframe class="email-frame" title="E-mail de {{ month_label }}" src="{{ url_for('newsletter.export_email_preview', month=newsletter.month) }}"></iframe>
+
+      <h3>Créer le brouillon Gmail</h3>
+      <ol>
+        {% if drive_dir %}
+          <li>Le paquet a été copié dans votre dossier Google Drive : <code>{{ drive_dir }}</code>.
+            Attendez que Google Drive l'ait synchronisé (icône de nuage).</li>
+        {% else %}
+          <li>Téléchargez le paquet (lien ci-dessus) et déposez-le dans le dossier
+            <strong>News Property</strong> de votre Google Drive.
+            <span class="muted">Astuce : avec Google Drive pour ordinateur, indiquez ce dossier dans
+            CP_DRIVE_DIR (fichier .env) et la copie sera automatique.</span></li>
+        {% endif %}
+        <li>Ouvrez votre projet Apps Script « News Property » (script.google.com) et lancez
+          la fonction <code>creerBrouillon</code>.{% if info.pdf %} Le script dépose aussi le PDF
+          à imprimer dans le dossier Drive, le partage en lecture et le relie au lien
+          « voir la version à imprimer ».{% endif %}</li>
+        <li>Dans Gmail, ouvrez le dossier <strong>Brouillons</strong> : ajoutez les destinataires,
+          relisez, puis envoyez.</li>
+      </ol>
+      <p class="muted">Première utilisation : installation du script décrite dans <code>docs/email.md</code>.</p>
+    {% endif %}
+  </section>
+{% endblock %}

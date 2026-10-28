@@ -1,0 +1,22 @@
+{# E-mail complet pour Gmail : tableaux de 600 px, styles en ligne (st, préparés en Python),
+   images jointes appelées par cid:. Variables : celles de _newsletter.html, plus subject,
+   preheader, st, motif_src, icon_src, front_icon_src, width. #}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>{{ subject }}</title>
+</head>
+<body style="{{ st.body }}">
+  <div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;font-size:1px;line-height:1px;">{{ preheader }}</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="{{ st.outer }}">
+    <tr>
+      <td align="center" style="{{ st.outer }}">
+        {% include "newsletter/_newsletter.html" %}
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

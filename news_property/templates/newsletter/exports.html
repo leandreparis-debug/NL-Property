@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Exporter - News Property{% endblock %}
+{% block content %}
+  <h1>Exporter</h1>
+  <p>Choisissez le mois à exporter. L'e-mail est préparé pour Gmail : un script Google Apps Script
+    en fait un brouillon dans votre boîte (voir la marche à suivre sur la page du mois).</p>
+  {% if rows %}
+    <table class="table">
+      <caption class="sr-only">Newsletters</caption>
+      <thead>
+        <tr><th scope="col">Mois</th><th scope="col">Statut</th><th scope="col">Dernier e-mail préparé</th>
+          <th scope="col"><span class="sr-only">Action</span></th></tr>
+      </thead>
+      <tbody>
+        {% for newsletter, status_label, info in rows %}
+          <tr>
+            <td>{{ format_month(newsletter.month) }}</td>
+            <td><span class="badge status-{{ newsletter.status }}">{{ status_label }}</span></td>
+            <td>{% if info %}{{ info.created_at }}{% else %}<span class="muted">jamais</span>{% endif %}</td>
+            <td><a class="btn" href="{{ url_for('newsletter.export_page', month=newsletter.month) }}">Exporter</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Aucune newsletter pour l'instant : lancez une collecte de la veille ou ouvrez un mois dans « Relire ».</p>
+  {% endif %}
+{% endblock %}

@@ -594,3 +594,14 @@ table.figures td { text-align: right; font-family: var(--font-label); font-weigh
 /* Fonction pas encore livrée (étapes suivantes). */
 .feature-card-soon { opacity: 0.75; }
 .feature-soon { margin-top: auto; font-size: 0.85rem; color: var(--muted); font-style: italic; }
+
+/* Page d'export e-mail. */
+.export-box {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.3rem 1.5rem;
+  margin-top: 1rem;
+}
+.export-box h2 { margin-top: 0; }
+.email-frame { width: 100%; height: 720px; border: 0; border-radius: 10px; background: var(--white); box-shadow: inset 0 0 0 1px var(--line); }
