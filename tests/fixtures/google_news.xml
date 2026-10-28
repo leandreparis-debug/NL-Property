@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rss xmlns:media="http://search.yahoo.com/mrss/" version="2.0">
+  <channel>
+    <generator>NFE/5.0</generator>
+    <title>"Prologis" when:30d - Google Actualités</title>
+    <link>https://news.google.com/search?q=%22Prologis%22+when:30d&amp;hl=fr&amp;gl=FR&amp;ceid=FR:fr</link>
+    <language>fr</language>
+    <description>Google Actualités</description>
+    <item>
+      <title>Prologis livre une plateforme logistique à Lyon - Le Progrès</title>
+      <link>https://news.google.com/rss/articles/CBMiTESTARTICLE1?oc=5</link>
+      <guid isPermaLink="false">CBMiTESTARTICLE1</guid>
+      <pubDate>Tue, 06 Oct 2026 07:00:00 GMT</pubDate>
+      <source url="https://www.leprogres.fr">Le Progrès</source>
+    </item>
+    <item>
+      <title>Prologis acquiert un terrain en Île-de-France - Ouest-France</title>
+      <link>https://news.google.com/rss/articles/CBMiTESTARTICLE2?oc=5</link>
+      <guid isPermaLink="false">CBMiTESTARTICLE2</guid>
+      <pubDate>Fri, 25 Sep 2026 12:00:00 GMT</pubDate>
+      <source url="https://www.ouest-france.fr">Ouest-France</source>
+    </item>
+    <item>
+      <title>Prologis et la logistique urbaine - Le Progrès</title>
+      <link>https://news.google.com/rss/articles/CBMiTESTARTICLE3?oc=5</link>
+      <guid isPermaLink="false">CBMiTESTARTICLE3</guid>
+      <pubDate>Mon, 14 Sep 2026 12:00:00 GMT</pubDate>
+      <source url="https://www.leprogres.fr">Le Progrès</source>
+    </item>
+  </channel>
+</rss>

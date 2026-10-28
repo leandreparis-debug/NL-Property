@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Immo Log Test - Actualités</title>
+    <link>https://immolog-test.example/</link>
+    <description>Les dernières actualités</description>
+    <item>
+      <title>Prologis livre un entrepôt de 40 000 m² à Lyon</title>
+      <link>https://immolog-test.example/articles/prologis-entrepot-lyon</link>
+      <pubDate>Wed, 07 Oct 2026 08:00:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Argan signe un bail avec un logisticien</title>
+      <link>https://immolog-test.example/articles/argan-bail-logisticien</link>
+      <pubDate>Thu, 01 Oct 2026 10:30:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Marché des entrepôts : bilan du semestre</title>
+      <link>https://immolog-test.example/articles/marche-entrepots-bilan</link>
+      <pubDate>Mon, 21 Sep 2026 09:00:00 +0200</pubDate>
+    </item>
+    <item>
+      <title>Salon de la logistique : les temps forts</title>
+      <link>https://immolog-test.example/articles/salon-temps-forts</link>
+      <pubDate>Fri, 20 Mar 2026 09:00:00 +0100</pubDate>
+    </item>
+  </channel>
+</rss>

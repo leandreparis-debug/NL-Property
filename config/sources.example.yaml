@@ -1,0 +1,31 @@
+# Format de référence de config/sources.yaml : la liste des sources de veille.
+#
+# Ne remplissez pas ce fichier à la main : lancez diagnostiquer_sources.bat, relisez
+# la proposition générée (sources.proposed.yaml, dans le dossier reports des données),
+# puis copiez-la en config/sources.yaml. Règle du projet : aucun lien n'est inventé,
+# chaque URL doit provenir du diagnostic.
+
+# Sites d'actualité suivis par leur flux RSS ou Atom.
+sources:
+  - name: Exemple de site      # Nom affiché dans l'application et dans les rapports.
+    type: rss                  # rss (flux RSS/Atom d'un site) ou google_news.
+    url: https://www.exemple.fr/feed  # URL du flux trouvée par le diagnostic (null si aucune).
+    enabled: true              # true : la source est collectée ; false : ignorée.
+    verdict: exploitable       # Verdict du diagnostic, recopié pour mémoire
+                               # (exploitable | partiel | inexploitable). Non utilisé par la collecte.
+    note: ""                   # Remarque libre (le diagnostic y met la raison de son verdict).
+
+# Recherche Google Actualités : un flux RSS par sujet (thème ou acteur suivi).
+google_news:
+  enabled: true                         # true : interroger Google Actualités pour chaque sujet.
+  query_template: '"{subject}" when:30d'  # Requête ; {subject} est remplacé par le sujet.
+                                        # Les guillemets imposent l'expression exacte, when:30d
+                                        # limite aux 30 derniers jours.
+  link_resolution: google_link_only     # resolved : les liens mènent directement à l'éditeur ;
+                                        # google_link_only : liens news.google.com, qui ouvrent le
+                                        # vrai article chez le lecteur (non bloquant).
+  verdict: exploitable                  # Verdict du diagnostic, pour mémoire.
+  note: ""                              # Remarque libre.
+  subjects:                             # Sujets recherchés (une requête chacun) : les thèmes
+    - immobilier logistique             # (immobilier logistique, entrepôt logistique...) puis
+    - Prologis                          # les acteurs de config/acteurs.yaml.

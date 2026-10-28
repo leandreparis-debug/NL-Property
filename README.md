@@ -17,11 +17,11 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 2 sur 10)** : socle technique (configuration, journal, sécurité,
+> **État actuel (étape 3 sur 10)** : socle technique (configuration, journal, sécurité,
 > page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
-> locale avec migrations et référentiel des acteurs suivis. Les étapes suivantes ajoutent
-> le diagnostic des sources, la collecte, la détection, la relecture, le contenu interne,
-> l'aperçu, l'e-mail et la démonstration.
+> locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
+> veille. Les étapes suivantes ajoutent la collecte, la détection, la relecture, le
+> contenu interne, l'aperçu, l'e-mail et la démonstration.
 
 ## Prérequis
 
@@ -150,6 +150,81 @@ Une valeur invalide arrête l'application avec un message qui nomme la variable 
 fichier `.env` n'est pas versionné : n'y mettez rien qui doive être partagé. Aucun secret
 n'est écrit dans le code.
 
+## Tester les sources de veille
+
+La veille ne repose que sur des flux d'actualité **réellement exploitables** : aucun lien
+n'est inventé, une source n'est retenue que si elle fournit de vrais articles avec leur URL
+d'origine. L'outil de diagnostic teste depuis votre PC chaque source candidate : 9 sites
+spécialisés (immobilier d'entreprise, logistique, construction) et Google Actualités,
+interrogé pour 4 thèmes (« immobilier logistique », « entrepôt logistique », « plateforme
+logistique », « parc logistique ») puis pour chacun des acteurs de `config\acteurs.yaml`.
+La liste des sites est dans `news_property/sources/candidates.py` : seules leurs pages
+d'accueil publiques y figurent, c'est le diagnostic qui cherche et vérifie les flux.
+
+Sites candidats : Business Immo, CFNEWS Immo, Immoweek, Voxlog, Supply Chain Magazine,
+Stratégies Logistique, Actu Transport Logistique, Le Moniteur, Batiactu. Ajoutez-y vos
+sites habituels (nom et page d'accueil) puis relancez le diagnostic.
+
+### Lancer le diagnostic
+
+Double-cliquez sur **`diagnostiquer_sources.bat`** (connexion Internet requise, compter
+quelques minutes : une requête par site et par sujet, avec une seconde d'attente entre deux
+requêtes vers un même site). La progression s'affiche dans la fenêtre, puis le rapport
+s'ouvre automatiquement.
+
+Équivalent en ligne de commande :
+
+```bat
+.venv\Scripts\python.exe -m news_property.tools.diagnose_sources
+.venv\Scripts\python.exe -m news_property.tools.diagnose_sources --only "Business Immo"
+.venv\Scripts\python.exe -m news_property.tools.diagnose_sources --only "Prologis"
+.venv\Scripts\python.exe -m news_property.tools.diagnose_sources --no-google
+```
+
+L'outil est « poli » envers les sites : il s'annonce (`NewsProperty/0.1.0 (veille
+interne)`), attend 1 seconde entre deux requêtes vers un même site, réessaie 2 fois au plus
+en cas d'erreur réseau, et respecte `robots.txt` pour les pages HTML. Une source en erreur
+n'interrompt jamais le diagnostic des autres.
+
+### Où trouver le rapport
+
+Dans le dossier `reports` des données (`%LOCALAPPDATA%\NewsProperty\reports`) :
+
+| Fichier | Contenu |
+|---|---|
+| `sources-AAAAMMJJ-HHMM.md` | Rapport lisible : tableau de synthèse puis détail par source (flux trouvés, chiffres, titres d'exemple, liens testés, erreurs) |
+| `sources-AAAAMMJJ-HHMM.json` | Mêmes données, structurées |
+| `sources.proposed.yaml` | Proposition de configuration (remplacée à chaque diagnostic) |
+
+Le détail technique des erreurs est dans `logs\news_property.log`.
+
+### Lire les verdicts
+
+- **exploitable** : flux trouvé, au moins 80 % des articles ont un titre, une date et un
+  lien, au moins un article publié depuis 30 jours, et les liens testés (3 par flux)
+  répondent correctement.
+- **partiel** : flux trouvé, mais un critère manque ; la raison indique lequel (ex. « aucune
+  date de publication », « aucun article depuis 30 jours »).
+- **inexploitable** : aucun flux trouvé, ou erreur (ex. « Le site a refusé l'accès
+  (HTTP 403) »).
+
+Pour Google Actualités, le verdict est donné par sujet puis globalement ; un sujet sans
+article sur 30 jours n'est pas un défaut de la source. La ligne « Résolution des liens »
+indique si les liens Google mènent directement à l'article de l'éditeur (`resolved`) ou
+restent des liens `news.google.com` (`google_link_only`) : ce n'est pas bloquant, ces liens
+ouvrent bien le vrai article chez le lecteur.
+
+### Valider la proposition
+
+1. Relisez `sources.proposed.yaml` en vous aidant du rapport. Seules les sources
+   « exploitable » y sont activées (`enabled: true`) ; une source sans flux a `url: null`.
+2. Ajustez si besoin (`enabled: true/false`, `note`), sans inventer d'URL : chaque adresse
+   doit venir du diagnostic.
+3. Copiez le fichier vers **`config\sources.yaml`** dans le dossier du projet. C'est ce
+   fichier que la collecte (étape 4) utilisera.
+
+Le format est documenté, champ par champ, dans `config/sources.example.yaml`.
+
 ## Thème et charte graphique
 
 Tout ce qui relève de la charte graphique est dans **`config/theme.yaml`** : nom, phrase
@@ -202,6 +277,7 @@ Vérification du style du code (longueur de ligne 100) :
 NewsProperty/
 ├── lancer.bat              # Lancement en double-clic (crée/met à jour .venv)
 ├── tests.bat               # Lancement des tests
+├── diagnostiquer_sources.bat # Diagnostic des sources de veille
 ├── requirements.txt        # Dépendances d'exécution (versions exactes)
 ├── requirements-dev.txt    # Dépendances de test et de lint (inclut requirements.txt)
 ├── pyproject.toml          # Métadonnées du projet, configuration de pytest et de ruff
@@ -211,6 +287,7 @@ NewsProperty/
 ├── README.md
 ├── config/
 │   ├── acteurs.yaml        # Référentiel des acteurs suivis (immobilier logistique)
+│   ├── sources.example.yaml  # Format documenté de config/sources.yaml
 │   ├── theme.yaml          # Charte graphique de la newsletter (couleurs du logo)
 │   └── assets/             # Logos Carrefour Property (couleurs, réserve blanche)
 ├── docs/
@@ -231,6 +308,13 @@ NewsProperty/
 │   │   ├── connection.py   # Connexion SQLite, migrations, intégration Flask
 │   │   └── migrations/     # 0001_initial.sql...
 │   ├── repositories/       # Fonctions d'accès aux données, une par table principale
+│   ├── http_client.py      # Client HTTP poli (reprises, débit, robots.txt)
+│   ├── sources/
+│   │   ├── candidates.py   # Sites candidats, thèmes et acteurs pour Google Actualités
+│   │   ├── discovery.py    # Découverte des flux d'un site
+│   │   └── evaluation.py   # Évaluation d'un flux, Google Actualités, verdicts
+│   ├── tools/
+│   │   └── diagnose_sources.py  # Outil de diagnostic des sources
 │   ├── ui.py               # Menu, cartes de l'accueil, variables du thème
 │   ├── fonts.py            # Police système pour les images générées
 │   ├── newsletter/         # Thème (theme.py), formes de la charte (shapes.py), pages
@@ -238,14 +322,19 @@ NewsProperty/
 │   └── static/             # Feuille de style de l'application
 └── tests/
     ├── conftest.py         # Fixtures (données dans tmp_path, réseau interdit)
-    ├── helpers.py          # Application de test, jeton CSRF, thème de test
+    ├── helpers.py          # Application de test, jeton CSRF, thème de test, HTTP simulé
+    ├── fixtures/           # Pages HTML et flux RSS enregistrés
     ├── test_config.py
     ├── test_app.py
     ├── test_theme.py
     ├── test_security.py
     ├── test_db.py
     ├── test_actors.py
-    └── test_repositories.py
+    ├── test_repositories.py
+    ├── test_http_client.py
+    ├── test_discovery.py
+    ├── test_evaluation.py
+    └── test_diagnose_sources.py
 ```
 
 ## Conventions de développement

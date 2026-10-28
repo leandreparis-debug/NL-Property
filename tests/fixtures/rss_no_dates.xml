@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Flux sans dates</title>
+    <link>https://nodates.example/</link>
+    <description>Flux dont les articles n'ont pas de date</description>
+    <item>
+      <title>Premier article</title>
+      <link>https://nodates.example/article-1</link>
+    </item>
+    <item>
+      <title>Deuxième article</title>
+      <link>https://nodates.example/article-2</link>
+    </item>
+  </channel>
+</rss>
