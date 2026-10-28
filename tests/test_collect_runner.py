@@ -132,7 +132,10 @@ def test_full_collection_two_sites(
     assert prologis.body_text is not None and "trentaine de livraisons" in prologis.body_text
     assert prologis.selected is True and prologis.position == 0
     assert prologis.collected_at == NOW
-    assert prologis.is_transaction is False and prologis.transaction_source is None
+    # Détection lancée en fin de collecte : « livre » + « entrepôt » dans le titre.
+    assert prologis.is_transaction is True and prologis.transaction_source == "auto"
+    assert prologis.transaction_evidence == "Prologis livre son 100e entrepôt en France"
+    assert report.detection is not None and report.detection["transactions"] >= 1
 
     rubric1 = articles.list_for_rubric(db, nid, 1)
     assert [a.title for a in rubric1] == [
@@ -239,7 +242,10 @@ def test_rerun_keeps_review_work(
     assert second.added_articles[0].title == "Un nouvel entrepôt frigorifique à Rungis"
     after = {a.id: a for r in (1, 2) for a in articles.list_for_rubric(db, nid, r)}
     for article_id, article in before.items():
-        assert after[article_id] == article  # rien n'est modifié
+        # Rien n'est modifié, sauf la preuve de la détection automatique, recalculée
+        # (le titre corrigé ne contient plus la phrase : la preuve vient du texte).
+        kept = {k: v for k, v in vars(article).items() if not k.startswith("transaction_")}
+        assert {k: v for k, v in vars(after[article_id]).items() if k in kept} == kept
     corrected = after[prologis.id]
     assert corrected.title == "Titre corrigé par l'utilisateur"
     assert corrected.selected is False

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Détection {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  <h1>Détection : {{ month_label }}</h1>
+  {% if error %}<p class="alert">{{ error }}</p>{% endif %}
+  {% if report %}
+    <p>{{ report.articles_analysed }} article(s) analysé(s). Le repère « Transaction » est une
+      <strong>suggestion à vérifier</strong> : chaque détection est justifiée par une phrase de l'article.</p>
+    <table class="figures">
+      <tr><th>Transactions détectées</th><td>{{ report.transactions|length }}</td></tr>
+      <tr><th>Repères « transaction » modifiés à la main (conservés)</th><td>{{ report.protected_transactions }}</td></tr>
+      <tr><th>Surfaces trouvées hors transaction</th><td>{{ report.surfaces|length }}</td></tr>
+    </table>
+
+    {% if report.transactions %}
+      <h2>Transactions</h2>
+      <ul class="evidence">
+        {% for finding in report.transactions %}
+          <li><a href="{{ finding.article.url }}" target="_blank" rel="noopener noreferrer">{{ finding.article.title }}</a>
+            - {{ finding.article.source_name }}<br>
+            <q>{{ finding.match.sentence }}</q><br>
+            <small>Termes : {{ finding.match.terms|join(", ") }} - surface : {{ format_sqm(finding.surface_sqm) }}</small></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% if report.surfaces %}
+      <h2>Surfaces trouvées hors transaction</h2>
+      <ul class="evidence">
+        {% for finding in report.surfaces %}
+          <li><a href="{{ finding.article.url }}" target="_blank" rel="noopener noreferrer">{{ finding.article.title }}</a>
+            - {{ format_sqm(finding.surface_sqm) }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endif %}
+  <p><a href="{{ url_for('collect.index', mois=month) }}">Retour à la collecte</a> ·
+     <a href="{{ url_for('index') }}">Accueil</a></p>
+{% endblock %}

@@ -38,6 +38,9 @@ from news_property.collect.runner import (
 from news_property.config import ConfigError
 from news_property.dates import format_month_fr
 from news_property.db.connection import get_connection, get_db
+from news_property.detect.reporting import format_sqm
+from news_property.detect.rules import DETECTION_RULES_FILE
+from news_property.detect.runner import run_detection
 from news_property.http_client import Fetcher
 from news_property.models import validate_month
 from news_property.repositories import collection_runs, newsletters
@@ -111,6 +114,9 @@ def _run_job(app: Flask, job: CollectionJob) -> None:
                 fetcher=fetcher,
                 sources_path=app.config.get("CP_SOURCES_FILE", SOURCES_FILE),
                 rules_path=app.config.get("CP_RULES_FILE", RULES_FILE),
+                detection_rules_path=app.config.get(
+                    "CP_DETECTION_RULES_FILE", DETECTION_RULES_FILE
+                ),
                 on_progress=on_progress,
             )
         job.state = "done"
@@ -261,4 +267,48 @@ def status() -> ResponseReturnValue:
         month_label=month_label(job.month),
         summary=summary,
         refresh=REFRESH_SECONDS if job.state == "running" else None,
+    )
+
+
+@bp.post("/detection")
+def detect() -> ResponseReturnValue:
+    """Relance la détection (transactions, surfaces) sur les articles du mois en base."""
+    raw_month = (request.form.get("mois") or "").strip()
+    try:
+        month = validate_month(raw_month)
+    except ValueError as exc:
+        return _detection_page(previous_month(app_now()), None, str(exc), 400)
+    job = _registry(current_app).job
+    busy = _running_elsewhere() or (
+        "Une collecte est en cours : relancez la détection quand elle sera terminée."
+        if job is not None and job.state == "running"
+        else None
+    )
+    if busy:
+        return _detection_page(month, None, busy, 409)
+    try:
+        report = run_detection(
+            get_db(),
+            month,
+            rules_path=current_app.config.get("CP_DETECTION_RULES_FILE", DETECTION_RULES_FILE),
+        )
+    except ConfigError as exc:
+        return _detection_page(month, None, str(exc), 400)
+    return _detection_page(month, report, None, 200)
+
+
+def _detection_page(
+    month: str, report: Any, error: str | None, status_code: int
+) -> ResponseReturnValue:
+    """Page du bilan de détection."""
+    return (
+        render_template(
+            "collect/detection.html",
+            month=month,
+            month_label=month_label(month),
+            report=report,
+            error=error,
+            format_sqm=format_sqm,
+        ),
+        status_code,
     )

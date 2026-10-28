@@ -35,6 +35,8 @@ from news_property.collect.text import title_key
 from news_property.collect.urls import clean_url, url_key
 from news_property.config import Settings
 from news_property.db.connection import transaction
+from news_property.detect.rules import DETECTION_RULES_FILE, DetectionRulesError
+from news_property.detect.runner import run_detection
 from news_property.http_client import Fetcher, get_default_fetcher
 from news_property.models import Actor, Article, validate_month, validate_url
 from news_property.repositories import actors, articles, collection_runs, newsletters
@@ -100,6 +102,8 @@ class CollectionReport:
     sources: list[SourceStat] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
     added_articles: list[Article] = field(default_factory=list)
+    detection: dict[str, Any] | None = None  # bilan de la détection lancée après la collecte
+    detection_error: str | None = None
 
     @property
     def added_total(self) -> int:
@@ -126,6 +130,8 @@ class CollectionReport:
                 for s in self.sources
             ],
             "added_by_source_name": self.added_by_source_name(),
+            "detection": self.detection,
+            "detection_error": self.detection_error,
         }
 
 
@@ -309,6 +315,23 @@ def _collect_feed(ctx: _Context, stat: SourceStat, url: str, label: str, is_goog
             ctx.report.errors.append(message)
 
 
+def _detect_after_collection(
+    conn: sqlite3.Connection, month: str, rules_path: Path
+) -> tuple[dict[str, Any] | None, str | None]:
+    """Lance la détection (transactions, surfaces) ; renvoie (bilan, erreur)."""
+    try:
+        detection = run_detection(conn, month, rules_path=rules_path)
+    except DetectionRulesError as exc:
+        return None, f"Détection non lancée : {exc}"
+    except Exception as exc:
+        logger.exception("Détection du mois %s interrompue", month)
+        return None, (
+            f"Détection interrompue par une erreur inattendue ({exc.__class__.__name__}), "
+            "détail dans le journal."
+        )
+    return detection.summary(), None
+
+
 def _start_run(conn: sqlite3.Connection, newsletter_id: int, now: datetime) -> int:
     """Verrou : refuse si une collecte est en cours, sinon enregistre le début de celle-ci.
 
@@ -341,13 +364,16 @@ def run_collection(
     fetcher: Fetcher | None = None,
     sources_path: Path = SOURCES_FILE,
     rules_path: Path = RULES_FILE,
+    detection_rules_path: Path = DETECTION_RULES_FILE,
     on_progress: Callable[[Progress], None] | None = None,
 ) -> CollectionReport:
     """Collecte les articles du mois (AAAA-MM) depuis les sources activées.
 
     Ajoute uniquement les nouveaux articles (selected = 1, en fin de rubrique) : les
     articles déjà présents ne sont jamais modifiés ni supprimés. Une source en erreur
-    n'interrompt pas la collecte (statut « partial »).
+    n'interrompt pas la collecte (statut « partial »). La détection des transactions et
+    des surfaces (étape 5) est lancée à la fin ; si elle échoue (règles invalides), la
+    collecte reste valable et l'erreur figure dans report.detection_error.
 
     settings est réservé aux évolutions (dossiers de données) ; la configuration vient de
     sources_path et rules_path.
@@ -408,6 +434,9 @@ def run_collection(
                 )
             _collect_feed(ctx, stat, url, label, is_google)
 
+        report.detection, report.detection_error = _detect_after_collection(
+            conn, month, detection_rules_path
+        )
         if not report.errors:
             report.status = "success"
         elif ctx.failed_feeds >= len(steps):

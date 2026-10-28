@@ -1,0 +1,72 @@
+# Cas étiquetés pour la détection (phrases réalistes inventées pour les tests ; aucun lien).
+# transaction : l'article doit-il être marqué « transaction » ?
+# surface : surface attendue en m² (null = aucune).
+cases:
+  - id: transaction_bail_entrepot
+    text: "Le logisticien signe un bail pour un entrepôt de 40 000 m² à Lyon."
+    transaction: true
+    surface: 40000
+  - id: transaction_acquisition_plateforme
+    text: "Argan acquiert une plateforme logistique de 25.000 m2 près d'Orléans."
+    transaction: true
+    surface: 25000
+  - id: transaction_livraison
+    text: "Prologis a livré un bâtiment logistique de 35 000 mètres carrés à Moissy."
+    transaction: true
+    surface: 35000
+  - id: transaction_expression_forte_befa
+    text: "Un BEFA de douze ans a été conclu avec le distributeur."
+    transaction: true
+    surface: null
+  - id: transaction_cle_en_main
+    text: "Le promoteur lance un clé en main logistique pour un chargeur alimentaire."
+    transaction: true
+    surface: null
+  - id: transaction_premiere_pierre
+    text: "La première pierre a été posée. Le développeur pose la première pierre du parc logistique de Saint-Vulbas."
+    transaction: true
+    surface: null
+  - id: transaction_surface_dans_phrase_voisine
+    text: "GLP cède un portefeuille logistique à un fonds. L'ensemble totalise 120 000 m² répartis sur six sites."
+    transaction: true
+    surface: 120000
+  - id: transaction_plus_grande_surface_de_la_phrase
+    text: "Le groupe loue un entrepôt de 12 000 m² extensible à 18 000 m² sur un terrain de 4 hectares."
+    transaction: true
+    surface: 18000
+  - id: piege_termes_dans_deux_phrases
+    text: "Le logisticien signe un bail. L'entrepôt sera prêt en 2027."
+    transaction: false
+    surface: null
+  - id: piege_fermeture
+    text: "Le distributeur ferme son entrepôt de Vitrolles et cède ses stocks."
+    transaction: false
+    surface: null
+  - id: piege_entrepot_de_donnees
+    text: "La société acquiert un entrepôt de données pour ses clients bancaires."
+    transaction: false
+    surface: null
+  - id: piege_actif_seul
+    text: "Le marché des entrepôts reste dynamique au premier semestre."
+    transaction: false
+    surface: null
+  - id: piege_action_seule
+    text: "Le fonds investit dans les bureaux de La Défense."
+    transaction: false
+    surface: null
+  - id: surface_sans_transaction
+    text: "Le parc compte déjà 60 000 m² d'entrepôts occupés par trois logisticiens."
+    transaction: false
+    surface: 60000
+  - id: surface_plafond_depasse
+    text: "La France compte 95 000 000 m² d'entrepôts. Le site de 8 500 m2 est loué par un transporteur."
+    transaction: true
+    surface: 8500
+  - id: surface_nombre_sans_unite
+    text: "Le logisticien a signé un bail pour un entrepôt de 40 000 palettes."
+    transaction: true
+    surface: null
+  - id: transaction_titre_puis_texte
+    text: "Nouvelle implantation à Lille\nLe transporteur s'installe dans une messagerie de 6 000 m² livrée en blanc."
+    transaction: true
+    surface: 6000

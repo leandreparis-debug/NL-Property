@@ -17,11 +17,12 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 4 sur 10)** : socle technique (configuration, journal, sécurité,
+> **État actuel (étape 5 sur 10)** : socle technique (configuration, journal, sécurité,
 > page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
 > locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
-> veille, collecte de la veille. Les étapes suivantes ajoutent la détection, la
-> relecture, le contenu interne, l'aperçu, l'e-mail et la démonstration.
+> veille, collecte de la veille, détection des transactions et des surfaces. Les étapes
+> suivantes ajoutent la relecture, le contenu interne, l'aperçu, l'e-mail et la
+> démonstration.
 
 ## Prérequis
 
@@ -226,6 +227,39 @@ interrogés sur Google Actualités se règlent dans le bloc `google_news.topics`
 `config\sources.yaml`. Les changements s'appliquent aux collectes suivantes ; les articles
 déjà collectés ne sont pas reclassés.
 
+## Transactions et surfaces
+
+Après chaque collecte, l'application propose automatiquement :
+
+- un **repère « Transaction »** sur les articles qui annoncent une signature de bail, une
+  acquisition, une cession, une livraison ou une mise en chantier d'un actif logistique ;
+- la **surface en m²** citée dans l'article, si elle est écrite (jamais inventée).
+
+Chaque détection est justifiée par **la phrase de l'article** qui l'a déclenchée. Ce sont des
+suggestions à vérifier pendant la relecture.
+
+- **Relancer la détection** : bouton « Relancer la détection » sur la page « Collecter la
+  veille », ou :
+
+  ```bat
+  .venv\Scripts\python.exe -m news_property.tools.detect --month 2026-10
+  ```
+
+  Un repère « Transaction » modifié à la main et une surface déjà renseignée ne sont jamais
+  touchés.
+- **Mesurer la fiabilité** sur un mois réel :
+
+  ```bat
+  .venv\Scripts\python.exe -m news_property.tools.evaluate_detection --month 2026-10
+  ```
+
+  Le rapport (`%LOCALAPPDATA%\NewsProperty\reports\detection-...md`) liste chaque détection
+  avec sa phrase et une case « juste / faux » à cocher, ainsi que les articles non marqués
+  qui contiennent un terme (oublis possibles). Il sert à décider si le repère est assez
+  fiable pour être gardé.
+- **Ajuster les règles** : `config\regles_detection.yaml` (mots-clés, commenté).
+  Fonctionnement et limites : [`docs/detection.md`](docs/detection.md).
+
 ## Tester les sources de veille
 
 La veille ne repose que sur des flux d'actualité **réellement exploitables** : aucun lien
@@ -365,11 +399,13 @@ NewsProperty/
 ├── config/
 │   ├── acteurs.yaml        # Référentiel des acteurs suivis (immobilier logistique)
 │   ├── regles_veille.yaml  # Mots-clés de tri de la veille (rubrique 1, exclusions)
+│   ├── regles_detection.yaml # Règles « transaction » et surface
 │   ├── sources.example.yaml  # Format documenté de config/sources.yaml
 │   ├── theme.yaml          # Charte graphique de la newsletter (couleurs du logo)
 │   └── assets/             # Logos Carrefour Property (couleurs, réserve blanche)
 ├── docs/
 │   ├── data-model.md       # Modèle de données et procédure de migration
+│   ├── detection.md        # Détection des transactions et des surfaces
 │   ├── theme.md            # Thème : origine des valeurs, clés modifiables
 │   └── securite.md         # CSRF, contrôle du Host, échappement, liens non modifiables
 ├── news_property/          # Code de l'application
@@ -399,9 +435,12 @@ NewsProperty/
 │   │   ├── excerpt.py      # Premières lignes et texte brut des articles
 │   │   ├── runner.py       # Orchestrateur run_collection()
 │   │   └── views.py        # Pages web /collecte
+│   ├── detect/             # Détection : règles, phrases, transactions, surfaces, rapports
 │   ├── tools/
 │   │   ├── diagnose_sources.py  # Outil de diagnostic des sources
-│   │   └── collect.py      # Collecte en ligne de commande
+│   │   ├── collect.py      # Collecte en ligne de commande
+│   │   ├── detect.py       # Détection en ligne de commande
+│   │   └── evaluate_detection.py  # Rapport de fiabilité de la détection
 │   ├── ui.py               # Menu, cartes de l'accueil, variables du thème
 │   ├── fonts.py            # Police système pour les images générées
 │   ├── newsletter/         # Thème (theme.py), formes de la charte (shapes.py), pages
@@ -424,7 +463,8 @@ NewsProperty/
     ├── test_diagnose_sources.py
     ├── test_collect_units.py
     ├── test_collect_runner.py
-    └── test_collect_web.py
+    ├── test_collect_web.py
+    └── test_detection.py   # dont les cas étiquetés de fixtures/detection_cases.yaml
 ```
 
 ## Conventions de développement

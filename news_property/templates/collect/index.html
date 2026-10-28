@@ -21,6 +21,14 @@
     <button type="submit" {% if config_error or job %}disabled{% endif %}>Lancer la collecte</button>
   </form>
 
+  <form method="post" action="{{ url_for('collect.detect') }}" class="collect-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="mois" value="{{ month }}">
+    <button type="submit" {% if job %}disabled{% endif %}>Relancer la détection</button>
+    <span class="hint">Transactions et surfaces de {{ month_label }}, sur les articles déjà
+      collectés (les repères modifiés à la main ne sont jamais touchés).</span>
+  </form>
+
   {% if last_run %}
     <h2>Dernière collecte de {{ month_label }}</h2>
     <p>Lancée le {{ last_run.started_at.astimezone().strftime("%d/%m/%Y à %H:%M") }}.</p>

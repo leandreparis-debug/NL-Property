@@ -1,0 +1,119 @@
+# Règles de détection : repère « transaction » et surface en m².
+#
+# Aucune IA : la détection applique ces listes telles quelles, phrase par phrase, sur le
+# titre, les premières lignes et le texte de chaque article du mois. Chaque détection
+# garde la phrase qui la justifie et les termes trouvés, pour pouvoir la vérifier.
+#
+# Comparaison des termes : la casse, les accents et le type d'apostrophe (' ou ’) ne
+# comptent pas ; le terme doit être un mot entier ; le pluriel en s ou x du dernier mot
+# est accepté (« plateforme logistique » ne trouve PAS « plateformes logistiques » :
+# ajoutez les deux formes quand le pluriel change plusieurs mots).
+#
+# Pour ajouter un mot-clé : ajoutez une ligne « - expression » dans la bonne liste (même
+# indentation, 2 espaces par niveau), enregistrez, puis relancez la détection (bouton
+# « Relancer la détection » ou python -m news_property.tools.detect --month AAAA-MM).
+# Un fichier invalide est refusé avec un message, sans rien modifier en base.
+
+# ---------------------------------------------------------------------------------------
+# Repère « transaction » : l'article annonce une signature, une acquisition, une cession,
+# une livraison ou une mise en chantier d'un actif logistique.
+# Un article est marqué si UNE MÊME PHRASE contient un terme d'« action_terms » ET un
+# terme d'« asset_terms », ou si une phrase contient une expression de « strong_terms ».
+# Une phrase qui contient une expression d'« exclusions » est ignorée.
+transaction:
+  # Exemple : « Le logisticien SIGNE UN BAIL pour un entrepôt de 40 000 m². »
+  action_terms:
+    - signe un bail
+    - a signé un bail
+    - signature d'un bail
+    - signature du bail
+    - prend à bail
+    - pris à bail
+    - loue
+    - a loué
+    - location
+    - acquiert
+    - a acquis
+    - acquisition
+    - rachète
+    - a racheté
+    - rachat
+    - cède
+    - a cédé
+    - cession
+    - vend
+    - a vendu
+    - vente
+    - livre
+    - a livré
+    - livraison
+    - met en chantier
+    - mise en chantier
+    - pose la première pierre
+    - pose de la première pierre
+    - lance la construction
+    - lance les travaux
+    - commercialise
+    - a commercialisé
+    - commercialisation
+    - s'installe
+    - s'implante
+    - investit
+    - a investi
+
+  # Exemple : « ... pour un ENTREPÔT de 40 000 m² à Lyon. »
+  asset_terms:
+    - entrepôt
+    - plateforme logistique
+    - plateformes logistiques
+    - parc logistique
+    - parcs logistiques
+    - bâtiment logistique
+    - bâtiments logistiques
+    - site logistique
+    - sites logistiques
+    - base logistique
+    - bases logistiques
+    - hub logistique
+    - hubs logistiques
+    - messagerie
+    - actif logistique
+    - actifs logistiques
+    - portefeuille logistique
+    - locaux d'activité
+    - m2
+
+  # Exemple : « Un BAIL EN L'ÉTAT FUTUR D'ACHÈVEMENT a été signé. » (suffit à elle seule)
+  strong_terms:
+    - bail en l'état futur d'achèvement
+    - BEFA
+    - clé en main logistique
+    - clés en main logistiques
+    - vente en l'état futur d'achèvement
+    - VEFA logistique
+
+  # Exemple : « Le distributeur FERME SON ENTREPÔT de Vitrolles. » (ignorée)
+  exclusions:
+    - entrepôt de données
+    - entrepôts de données
+    - ferme son entrepôt
+    - ferme ses entrepôts
+    - fermeture de l'entrepôt
+    - fermeture de son entrepôt
+    - résilie son bail
+    - quitte son entrepôt
+
+# ---------------------------------------------------------------------------------------
+# Surface : un nombre suivi d'une unité de « surface_units » (« 40 000 m² », « 12.500 m2 »,
+# « 35 000 mètres carrés »). La plus grande surface de la phrase justificative est
+# retenue, sinon la plus grande surface de l'article. Rien n'est inventé : sans nombre dans
+# l'article, le champ reste vide.
+surface:
+  surface_units:
+    - m²
+    - m2
+    - mètres carrés
+    - metres carres
+  # Au-delà de cette valeur, le nombre n'est pas une surface d'entrepôt (ex. un chiffre
+  # d'affaires ou une surface nationale cumulée) et il est ignoré.
+  max_sqm: 1000000
