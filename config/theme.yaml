@@ -1,0 +1,80 @@
+# Thème de la newsletter : tout ce qui relève de la charte graphique est ici, et seulement ici.
+#
+# La mise en page reprend la structure de la charte de référence (bandeau de couleur avec
+# logo en réserve blanche et motif de formes, rubriques numérotées dans une arche, encadrés
+# clairs, logo couleurs en bas et centré). Les couleurs sont celles du logo Carrefour
+# Property : le violet #8D2562 est la couleur exacte du logo ; les autres sont des tons de
+# ce même violet (plus foncé pour les titres, plus clair pour les encadrés) et des gris
+# neutres pour le texte. Aucune autre couleur n'a été inventée. Mode d'emploi : docs/theme.md.
+# Après modification, ouvrez l'écran « Thème » de l'application : il vérifie le fichier et
+# les contrastes.
+#
+# Règles : couleurs au format #RRGGBB ; polices système uniquement (pas de police en ligne :
+# Gmail et l'impression doivent rendre la même chose sur tous les postes) ; chemins de
+# fichiers relatifs au dossier du projet.
+
+# Nom affiché dans le bandeau d'en-tête.
+name: News Property
+
+# Phrase sous le bandeau.
+tagline: La newsletter mensuelle de l'équipe entrepôts de Carrefour Property
+
+colors:
+  # Violet du logo Carrefour Property : bandeau d'en-tête, filets, grands éléments.
+  # Blanc sur ce violet = 8,2:1, utilisable aussi pour du petit texte.
+  primary: "#8D2562"
+  # Violet foncé (ton sombre du logo) : titres, liens, chiffres de la Une.
+  secondary: "#5E1741"
+  # Gris foncé neutre : texte courant.
+  text: "#3F3F3F"
+  # Gris moyen : sources, dates, légendes (reste lisible sur blanc et sur les encadrés).
+  muted: "#666666"
+  # Fond : reste blanc (impression et e-mail).
+  background: "#FFFFFF"
+  # Ton très clair du violet : encadrés (Une, sommaire, calendrier...).
+  surface: "#F7ECF2"
+  # Séparateurs fins (ton clair du violet).
+  border: "#E6CFDC"
+  # Badge « Transaction » (article qui annonce une transaction) : fond clair, texte foncé.
+  highlight: "#E9C6DA"
+  highlight_text: "#5E1741"
+
+# Couleur d'accent de chaque rubrique (formes, numéros, filets) : tons du violet du logo.
+# Le numéro est écrit en blanc ou en violet foncé, selon ce qui contraste le mieux.
+section_colors:
+  une: "#8D2562"
+  rubrique_1: "#5E1741"
+  rubrique_2: "#B2478A"
+  rubrique_3: "#8D2562"
+  rubrique_4: "#C97BAE"
+  rubrique_5: "#E0B3CC"
+  rubrique_6: "#5E1741"
+
+fonts:
+  # Polices système uniquement : Century Gothic (installée avec Office), puis équivalents.
+  body: "'Century Gothic', 'URW Gothic', 'Avant Garde', 'Trebuchet MS', Arial, sans-serif"
+  headings: "'Century Gothic', 'URW Gothic', 'Avant Garde', 'Trebuchet MS', Arial, sans-serif"
+  # Police condensée pour les encadrés et les chiffres : Bahnschrift Condensed (Windows 10
+  # et 11), puis Arial Narrow.
+  labels: "'Bahnschrift Condensed', Bahnschrift, 'Arial Narrow', 'Nimbus Sans Narrow', sans-serif"
+
+# Logo Carrefour Property (PNG, relatif au dossier du projet).
+# Version couleurs (violet) pour fond blanc (pied de page) ...
+logo: config/assets/logo-carrefour-property.png
+# ... et version en réserve blanche, uniquement sur le violet du bandeau.
+logo_reverse: config/assets/logo-carrefour-property-blanc.png
+# Texte alternatif des logos (lu à la place de l'image si elle ne s'affiche pas).
+logo_alt: Carrefour Property
+
+# Texte du pied de page.
+footer_text: "Newsletter interne Carrefour Property - diffusion réservée aux équipes Carrefour Property."
+
+# Titres des rubriques, modifiables.
+section_titles:
+  une: "À la une ce mois-ci"
+  rubrique_1: "Actualités de l'immobilier logistique"
+  rubrique_2: "Les acteurs du marché"
+  rubrique_3: "Nos visites d'entrepôts"
+  rubrique_4: "Calendrier à venir"
+  rubrique_5: "Congés et absences de l'équipe"
+  rubrique_6: "Documents utiles"

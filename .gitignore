@@ -1,0 +1,25 @@
+# Environnement Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Configuration locale (peut contenir des secrets)
+.env
+
+# Données locales (normalement hors du projet, dans %LOCALAPPDATA%\NewsProperty)
+data/
+*.db
+*.sqlite3
+*.log
+exports/
+reports/
+photos/
+
+# Éditeurs / système
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store

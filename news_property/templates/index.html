@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+  <section class="hero" aria-labelledby="hero-titre">
+    <div class="hero-motif" aria-hidden="true">{{ ui_motif_hero }}</div>
+    <p class="hero-kicker">Newsletter de {{ current_month }}</p>
+    <h1 id="hero-titre">News Property</h1>
+    <span class="hero-rule"></span>
+  </section>
+
+  <h2 class="section-heading">Préparer la newsletter</h2>
+  <section class="actions" aria-label="Fonctions">
+    {% for card in feature_cards %}
+      {% if card.url %}
+        <a class="feature-card" href="{{ card.url }}">
+      {% else %}
+        <div class="feature-card feature-card-soon">
+      {% endif %}
+        <span class="feature-icon">{{ card.icon }}</span>
+        <span class="feature-step">{{ "%02d"|format(loop.index) }}</span>
+        <span class="feature-title">{{ card.feature.label }}</span>
+        <span class="feature-text">{{ card.feature.description }}</span>
+        {% if card.url %}
+          <span class="feature-go" aria-hidden="true">→</span>
+        </a>
+        {% else %}
+          <span class="feature-soon">À venir dans une prochaine étape</span>
+        </div>
+        {% endif %}
+    {% endfor %}
+  </section>
+{% endblock %}

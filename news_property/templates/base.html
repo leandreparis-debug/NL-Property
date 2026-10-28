@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}News Property{% endblock %}</title>
+  {% block head %}{% endblock %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% if ui_theme_css %}<style>:root { {{ ui_theme_css }} }</style>{% endif %}
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+  <div class="app">
+    <aside class="sidebar">
+      <a class="sidebar-brand" href="{{ url_for('index') }}">
+        <img src="{{ url_for('newsletter.logo', variant='blanc') }}" alt="Carrefour Property" width="120">
+        <span class="sidebar-title">News Property</span>
+      </a>
+      <nav class="side-nav" aria-label="Navigation principale">
+        {% for item in nav_items %}
+          <a class="side-link{% if item.active %} is-active{% endif %}" href="{{ item.url }}"{% if item.active %} aria-current="page"{% endif %}>
+            <span class="side-icon">{{ item.icon }}</span>{{ item.label }}
+          </a>
+        {% endfor %}
+      </nav>
+      <div class="sidebar-motif" aria-hidden="true">{{ ui_motif }}</div>
+      <p class="sidebar-foot">v{{ app_version }} · application locale<br>Carrefour Property</p>
+    </aside>
+    <main class="container" id="contenu">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flashes" role="status" aria-live="polite">
+            {% for category, message in messages %}
+              <p class="flash flash-{{ category }}">{{ message }}</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

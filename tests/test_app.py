@@ -1,0 +1,116 @@
+"""Tests de l'application web : accueil, pages d'erreur, menu."""
+
+from __future__ import annotations
+
+import re
+from datetime import date
+
+import pytest
+from flask import Flask
+from flask.testing import FlaskClient
+
+from news_property import __version__
+from news_property.config import Settings
+from news_property.dates import format_month_fr
+from news_property.ui import NAV, active_section
+from tests.helpers import html_of, web_app
+
+
+def test_index(client: FlaskClient) -> None:
+    response = client.get("/")
+    assert response.status_code == 200
+    html = html_of(response)
+    assert "News Property" in html
+    assert format_month_fr(date.today()) in html
+    for label in ("Collecter la veille", "Relire", "Contenu interne", "Exporter", "Thème"):
+        assert label in html
+
+
+def test_index_links_only_the_functions_delivered(client: FlaskClient) -> None:
+    html = html_of(client.get("/"))
+    assert 'href="/theme"' in html
+    # Les fonctions des étapes suivantes sont annoncées sans lien.
+    assert "À venir dans une prochaine étape" in html
+
+
+def test_health(client: FlaskClient) -> None:
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.get_json() == {"status": "ok", "version": __version__}
+
+
+def test_404_page_in_french(client: FlaskClient) -> None:
+    response = client.get("/cette-page-n-existe-pas")
+    assert response.status_code == 404
+    html = html_of(response)
+    assert "Page introuvable" in html
+    assert "La page demandée" in html
+
+
+def test_500_page_hides_traceback(settings: Settings) -> None:
+    app: Flask = web_app(settings)
+
+    @app.get("/boom")
+    def boom() -> str:
+        raise RuntimeError("détail secret de l'erreur")
+
+    response = app.test_client().get("/boom")
+    assert response.status_code == 500
+    html = html_of(response)
+    assert "Erreur interne" in html
+    assert "Traceback" not in html
+    assert "RuntimeError" not in html
+    assert "détail secret" not in html
+
+
+def test_settings_stored_in_app(app: Flask, settings: Settings) -> None:
+    assert app.config["CP_SETTINGS"] is settings
+
+
+def test_format_month_fr() -> None:
+    assert format_month_fr(date(2026, 10, 9)) == "Octobre 2026"
+    assert format_month_fr(date(2026, 8, 1)) == "Août 2026"
+
+
+def test_sidebar_menu_marks_the_current_section(client: FlaskClient) -> None:
+    html = html_of(client.get("/"))
+    assert "Accueil" in html and "Thème" in html
+    assert 'src="/theme/logo/blanc"' in html  # logo en réserve blanche
+    assert re.search(r'class="side-link is-active" href="/" aria-current="page"', html)
+    theme = html_of(client.get("/theme"))
+    assert re.search(r'is-active" href="/theme" aria-current="page"', theme)
+
+
+def test_menu_hides_the_functions_not_delivered_yet(client: FlaskClient) -> None:
+    html = html_of(client.get("/"))
+    delivered = [label for _, label, endpoint in NAV if endpoint in ("index", "newsletter.theme")]
+    assert delivered == ["Accueil", "Thème"]
+    assert 'href="/collecte/"' not in html
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "section"),
+    [
+        ("index", "accueil"),
+        (None, "accueil"),
+        ("review.month", "relecture"),
+        ("content.openings", "relecture"),
+        ("content.start", "contenu"),
+        ("collect.status", "collecte"),
+        ("newsletter.export_page", "export"),
+        ("newsletter.exports", "export"),
+        ("newsletter.theme", "theme"),
+        ("newsletter.preview", "relecture"),
+    ],
+)
+def test_active_section(endpoint: str | None, section: str) -> None:
+    assert active_section(endpoint) == section
+
+
+def test_menu_icons_stay_visible_on_the_sidebar() -> None:
+    from news_property.newsletter.theme import contrast_ratio
+    from news_property.ui import _visible_on
+
+    colors = _visible_on(("#8D2562", "#5E1741", "#E0B3CC"), "#5E1741")
+    assert "#5E1741" not in colors
+    assert all(contrast_ratio(color, "#5E1741") >= 2 for color in colors)
