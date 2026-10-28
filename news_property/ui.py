@@ -151,6 +151,7 @@ def ui_context() -> dict[str, object]:
         "nav_items": nav,
         "feature_cards": features,
         "ui_theme_css": theme_css,
+        "route_available": _available,
         "ui_motif": Markup(motif_svg("#FFFFFF", columns=6, rows=6, cell=26, opacity=0.14)),
         "ui_motif_hero": Markup(motif_svg("#FFFFFF", columns=7, rows=7, cell=30, opacity=0.9)),
     }

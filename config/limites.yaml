@@ -1,0 +1,34 @@
+# Limites éditoriales de la newsletter (nombre maximal conseillé par rubrique).
+#
+# La version imprimée doit tenir en 4 pages A4 : ces limites servent de repère pendant la
+# relecture. Une rubrique qui dépasse sa limite est signalée en orange, mais rien n'est
+# bloqué (sauf le nombre de photos par visite, voir plus bas). Les valeurs sont relues à
+# chaque affichage : modifiez ce fichier, enregistrez, puis rechargez la page (inutile de
+# relancer l'application).
+#
+# Chaque valeur est un nombre entier entre 1 et 100. Si ce fichier est absent, les valeurs
+# ci-dessous sont utilisées ; s'il est invalide, un message l'indique et les mêmes valeurs
+# par défaut s'appliquent.
+
+# Rubrique 1 : Actualités de l'immobilier logistique (articles retenus).
+rubrique_1: 6
+
+# Rubrique 2 : Les acteurs du marché (articles retenus).
+rubrique_2: 8
+
+# Rubrique 3 : Nos visites d'entrepôts.
+visites: 4
+
+# Rubrique 3 : nombre maximal de photos par visite. Contrairement aux autres limites,
+# celle-ci est appliquée : une photo de plus est refusée avec un message. La première photo
+# est la « photo principale », utilisée en priorité dans les exports.
+photos_par_visite: 3
+
+# Rubrique 4 : Calendrier à venir (événements).
+evenements: 8
+
+# Rubrique 5 : Congés et absences de l'équipe.
+absences: 12
+
+# Nombre maximal de pages A4 de la version imprimée (rappel affiché pendant la relecture).
+pages_max: 4

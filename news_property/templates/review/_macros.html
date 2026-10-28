@@ -1,0 +1,18 @@
+{# Outils des cartes : valeur saisie conservée et erreur à côté du champ (carte refusée). #}
+{% macro val(edit, item_id, name, default) -%}
+  {%- if edit and edit.item_id == item_id -%}{{ edit.values.get(name, '') }}{%- else -%}{{ default if default is not none else '' }}{%- endif -%}
+{%- endmacro %}
+
+{% macro checked(edit, item_id, name, default) -%}
+  {%- if edit and edit.item_id == item_id -%}{% if name in edit.values %}checked{% endif %}{%- elif default -%}checked{%- endif -%}
+{%- endmacro %}
+
+{% macro invalid(edit, item_id, name, error_id) -%}
+  {%- if edit and edit.item_id == item_id and edit.errors.get(name) -%}aria-invalid="true" aria-describedby="{{ error_id }}"{%- endif -%}
+{%- endmacro %}
+
+{% macro error(edit, item_id, name, error_id) -%}
+  {%- if edit and edit.item_id == item_id and edit.errors.get(name) -%}
+    <p class="field-error" id="{{ error_id }}" role="alert">{{ edit.errors[name] }}</p>
+  {%- endif -%}
+{%- endmacro %}

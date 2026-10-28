@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% from "review/_macros.html" import val, checked, invalid, error %}
+{% block title %}Relecture {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  {% set counted_label = "retenus" %}
+  {% include "review/_header.html" %}
+
+  <div class="toolbar">
+    <a class="btn" href="{{ url_for('review.add_article', month=newsletter.month, rubrique=rubric) }}">+ Ajouter un article à la main</a>
+    {% if total > limit %}
+      <form method="post" action="{{ url_for('review.keep_first', month=newsletter.month, tab=tab) }}" class="inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="filtre" value="{{ filtre }}">
+        <button type="submit" class="btn">Ne retenir que les {{ limit }} premiers</button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if not items %}
+    <p class="muted">Aucun article {% if filtre != "tous" %}pour ce filtre{% else %}dans cette rubrique{% endif %}.</p>
+  {% endif %}
+
+  {% for a in items %}
+    {% set p = "a" ~ a.id %}
+    {% set editing = edit and edit.item_id == a.id %}
+    <article class="card{% if not a.selected %} card-off{% endif %}" id="article-{{ a.id }}">
+      <div class="card-line">
+        <span class="card-pos" title="Rang">{{ positions[a.id] + 1 }}</span>
+        <form method="post" action="{{ url_for('review.toggle_article', month=newsletter.month, article_id=a.id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="filtre" value="{{ filtre }}">
+          {% if a.selected %}
+            <button type="submit" name="valeur" value="0" class="btn btn-small btn-kept" title="Cliquer pour ne plus retenir cet article">✓ Retenu - ne plus retenir</button>
+          {% else %}
+            <button type="submit" name="valeur" value="1" class="btn btn-small btn-primary">Retenir</button>
+          {% endif %}
+        </form>
+        <span class="line-actor">{{ actor_names.get(a.actor_id) or a.actor_label or "-" }}</span>
+        <h2 class="card-title">{{ a.title }}</h2>
+        <span class="line-meta">{{ a.source_name }}{% if a.published_at %} · {{ date_value(a)[8:10] }}/{{ date_value(a)[5:7] }}/{{ date_value(a)[0:4] }}{% endif %}{% if a.surface_sqm %} · {{ format_sqm(a.surface_sqm) }}{% endif %}</span>
+        {% if a.is_transaction %}<span class="badge badge-opp">Transaction</span>{% endif %}
+        {% if a.link_verified_by_user %}<span class="badge badge-user" title="Le site refuse la lecture automatique : le lien a été vérifié à la main.">Lien vérifié par l'utilisateur</span>{% endif %}
+        <span class="badge badge-unsaved" {% if not editing %}hidden{% endif %}>Modifications non enregistrées</span>
+        <a class="article-link" href="{{ a.url }}" target="_blank" rel="noopener noreferrer">Ouvrir ↗<span class="sr-only"> l'article (nouvel onglet)</span></a>
+      </div>
+
+      <div class="card-actions">
+        {% with action=url_for('review.move_article', month=newsletter.month, article_id=a.id), position=positions[a.id], label="l'article", rank_id=p ~ "-rang" %}
+          {% include "review/_move.html" %}
+        {% endwith %}
+        <a class="btn btn-small btn-danger" href="{{ url_for('review.delete_article', month=newsletter.month, article_id=a.id) }}">Supprimer...</a>
+      </div>
+
+      <details class="card-details" {% if unfold_all or editing %}open{% endif %}>
+        <summary>Modifier</summary>
+        {% if editing and edit.errors.get("general") %}<p class="field-error" role="alert">{{ edit.errors.general }}</p>{% endif %}
+        <form method="post" action="{{ url_for('review.save_article', month=newsletter.month, article_id=a.id) }}" class="card-form" {% if editing %}data-dirty="1"{% endif %}>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="filtre" value="{{ filtre }}">
+          <label class="check"><input type="checkbox" name="transaction" {{ checked(edit, a.id, "transaction", a.is_transaction) }}>
+            Transaction (bail signé, acquisition, cession, livraison...)</label>
+          {% if a.transaction_source == "auto" and a.transaction_evidence %}
+            <p class="evidence">Repère détecté automatiquement d'après la phrase : <q>{{ a.transaction_evidence }}</q>
+              {% if a.transaction_terms %}<small>(termes : {{ a.transaction_terms|join(", ") }})</small>{% endif %}</p>
+          {% elif a.transaction_source == "manual" %}
+            <p class="evidence">Repère « Transaction » réglé à la main : la détection automatique ne le modifiera plus.</p>
+          {% endif %}
+
+          <div class="grid">
+            <div class="field field-wide">
+              <label for="{{ p }}-titre">Titre</label>
+              <input type="text" id="{{ p }}-titre" name="titre" value="{{ val(edit, a.id, 'titre', a.title) }}" maxlength="300" required {{ invalid(edit, a.id, 'titre', p ~ '-titre-err') }}>
+              {{ error(edit, a.id, "titre", p ~ "-titre-err") }}
+            </div>
+            {% set actor_value = val(edit, a.id, "acteur", a.actor_id if a.actor_id else (other_actor if a.actor_label else "")) %}
+            <div class="field">
+              <label for="{{ p }}-acteur">Acteur</label>
+              <select id="{{ p }}-acteur" name="acteur" class="actor-select" data-other="{{ p }}-autre-field" {{ invalid(edit, a.id, 'acteur', p ~ '-acteur-err') }}>
+                <option value="" {% if not actor_value %}selected{% endif %}>- Aucun -</option>
+                {% for b in actor_list %}
+                  <option value="{{ b.id }}" {% if actor_value == b.id|string %}selected{% endif %}>{{ b.name }}</option>
+                {% endfor %}
+                <option value="{{ other_actor }}" {% if actor_value == other_actor %}selected{% endif %}>Autre...</option>
+              </select>
+              {{ error(edit, a.id, "acteur", p ~ "-acteur-err") }}
+            </div>
+            <div class="field" id="{{ p }}-autre-field">
+              <label for="{{ p }}-autre">Autre acteur</label>
+              <input type="text" id="{{ p }}-autre" name="acteur_autre" value="{{ val(edit, a.id, 'acteur_autre', a.actor_label) }}" maxlength="100" {{ invalid(edit, a.id, 'acteur_autre', p ~ '-autre-err') }}>
+              {{ error(edit, a.id, "acteur_autre", p ~ "-autre-err") }}
+            </div>
+            <div class="field">
+              <label for="{{ p }}-surface">Surface (m²)</label>
+              <input type="text" id="{{ p }}-surface" name="surface" inputmode="numeric" value="{{ val(edit, a.id, 'surface', a.surface_sqm) }}" maxlength="12" {{ invalid(edit, a.id, 'surface', p ~ '-surface-err') }}>
+              {{ error(edit, a.id, "surface", p ~ "-surface-err") }}
+            </div>
+            <div class="field">
+              <label for="{{ p }}-date">Date</label>
+              <input type="date" id="{{ p }}-date" name="date" value="{{ val(edit, a.id, 'date', date_value(a)) }}" {{ invalid(edit, a.id, 'date', p ~ '-date-err') }}>
+              {{ error(edit, a.id, "date", p ~ "-date-err") }}
+            </div>
+            <div class="field">
+              <label for="{{ p }}-source">Source</label>
+              <input type="text" id="{{ p }}-source" name="source" value="{{ val(edit, a.id, 'source', a.source_name) }}" maxlength="120" required {{ invalid(edit, a.id, 'source', p ~ '-source-err') }}>
+              {{ error(edit, a.id, "source", p ~ "-source-err") }}
+            </div>
+            <div class="field field-wide">
+              <label for="{{ p }}-extrait">Premières lignes</label>
+              <textarea id="{{ p }}-extrait" name="extrait" rows="4" maxlength="1000" aria-describedby="{{ p }}-aide">{{ val(edit, a.id, 'extrait', a.excerpt) }}</textarea>
+              {{ error(edit, a.id, "extrait", p ~ "-extrait-err") }}
+              <p class="help" id="{{ p }}-aide">Vous pouvez couper ce texte ou corriger une faute, mais pas le réécrire :
+                il doit rester fidèle à ce que dit l'article.</p>
+            </div>
+            <div class="field field-wide">
+              <span class="label">Lien de l'article (non modifiable)</span>
+              <a class="url" href="{{ a.url }}" target="_blank" rel="noopener noreferrer">{{ a.url }}</a>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Enregistrer cet article</button>
+        </form>
+
+        <form method="post" action="{{ url_for('review.change_rubric', month=newsletter.month, article_id=a.id) }}" class="move-rubric">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="filtre" value="{{ filtre }}">
+          <input type="hidden" name="cible" value="{{ other_rubric }}">
+          {% if other_rubric == 2 %}
+            <span class="label">Déplacer vers la rubrique 2 - Les acteurs du marché (choisissez l'acteur) :</span>
+            <label for="{{ p }}-cible-acteur" class="sr-only">Acteur pour la rubrique 2</label>
+            <select id="{{ p }}-cible-acteur" name="acteur" class="actor-select" data-other="{{ p }}-cible-autre-field">
+              <option value="">- Choisir l'acteur -</option>
+              {% for b in actor_list %}<option value="{{ b.id }}" {% if a.actor_id == b.id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
+              <option value="{{ other_actor }}" {% if a.actor_label %}selected{% endif %}>Autre...</option>
+            </select>
+            <span id="{{ p }}-cible-autre-field">
+              <label for="{{ p }}-cible-autre">Autre acteur</label>
+              <input type="text" id="{{ p }}-cible-autre" name="acteur_autre" value="{{ a.actor_label or '' }}" maxlength="100">
+            </span>
+            <button type="submit" class="btn btn-small">Déplacer vers la rubrique 2</button>
+          {% else %}
+            <span class="label">Cet article ne concerne pas un acteur suivi ?</span>
+            <button type="submit" class="btn btn-small">Déplacer vers la rubrique 1 - Actualités de l'immobilier logistique</button>
+          {% endif %}
+        </form>
+      </details>
+    </article>
+  {% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='review.js') }}" defer></script>{% endblock %}

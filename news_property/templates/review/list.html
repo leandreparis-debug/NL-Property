@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Newsletters - News Property{% endblock %}
+{% block content %}
+  <h1>Newsletters</h1>
+  <p>Choisissez un mois à relire. Le mois précédent est proposé par défaut, puisque la newsletter
+    est préparée en début de mois pour le mois écoulé.</p>
+
+  <form method="post" action="{{ url_for('review.open_month') }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="mois">Mois</label>
+    <input type="month" id="mois" name="mois" value="{{ default_month }}" required>
+    <button type="submit" class="btn btn-primary">Ouvrir ou créer ce mois</button>
+  </form>
+
+  {% if summaries %}
+    <table class="table">
+      <caption class="sr-only">Newsletters existantes</caption>
+      <thead>
+        <tr><th scope="col">Mois</th><th scope="col">Statut</th>
+          <th scope="col">Éléments retenus</th><th scope="col"><span class="sr-only">Action</span></th></tr>
+      </thead>
+      <tbody>
+        {% for s in summaries %}
+          <tr>
+            <td>{{ month_label(s.month) }}</td>
+            <td><span class="badge status-{{ s.status }}">{{ s.status_label }}</span></td>
+            <td>{{ s.counts.total }}
+              <small class="muted">({{ s.counts.selected_1 }} immobilier logistique, {{ s.counts.selected_2 }} acteurs)</small></td>
+            <td><a class="btn" href="{{ url_for('review.month', month=s.month, tab='rubrique-1') }}">Relire</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="muted">Aucune newsletter pour l'instant : lancez une collecte de la veille ou ouvrez un mois ci-dessus.</p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Ajouter un article - News Property{% endblock %}
+{% block content %}
+  <p class="breadcrumb"><a href="{{ url_for('review.index') }}">Newsletters</a> ›
+    <a href="{{ url_for('review.month', month=newsletter.month, tab='rubrique-' ~ (form.rubrique or '1')) }}">{{ month_label }}</a> › Ajouter un article</p>
+  <h1>Ajouter un article à la main</h1>
+  {% if error %}<p class="alert" role="alert">{{ error }}</p>{% endif %}
+
+  {% if step == 1 %}
+    <p>Collez le lien de l'article. L'application vérifie qu'il fonctionne et lit son titre et
+      ses premières lignes ; vous pourrez ensuite les corriger.</p>
+    <form method="post" action="{{ url_for('review.check_article', month=newsletter.month) }}" class="card-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="field field-wide">
+        <label for="lien">Lien de l'article (obligatoire)</label>
+        <input type="url" id="lien" name="lien" value="{{ form.lien or '' }}" required placeholder="https://..." maxlength="2000">
+      </div>
+      <fieldset class="field">
+        <legend>Rubrique</legend>
+        <label class="check"><input type="radio" name="rubrique" value="1" {% if form.rubrique != "2" %}checked{% endif %}> Rubrique 1 - Actualités de l'immobilier logistique</label>
+        <label class="check"><input type="radio" name="rubrique" value="2" {% if form.rubrique == "2" %}checked{% endif %}> Rubrique 2 - Les acteurs du marché</label>
+      </fieldset>
+      <button type="submit" class="btn btn-primary">Vérifier le lien</button>
+    </form>
+  {% else %}
+    {% if refused %}
+      <div class="alert info" role="status">
+        <p><strong>{{ refused }}</strong></p>
+        <p>Ouvrez le lien dans votre navigateur. S'il affiche bien l'article, saisissez son titre et
+          ses premières lignes ci-dessous, puis cochez la case de confirmation. L'article sera marqué
+          « lien vérifié par l'utilisateur ».</p>
+        <p><a href="{{ form.lien }}" target="_blank" rel="noopener noreferrer">Ouvrir le lien dans un nouvel onglet ↗</a></p>
+      </div>
+    {% else %}
+      <p>Le lien fonctionne. Vérifiez et complétez les informations, puis enregistrez.</p>
+    {% endif %}
+    <form method="post" action="{{ url_for('review.save_new_article', month=newsletter.month) }}" class="card-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="lien" value="{{ form.lien }}">
+      <input type="hidden" name="rubrique" value="{{ form.rubrique }}">
+      <p>Lien : <a href="{{ form.lien }}" target="_blank" rel="noopener noreferrer">{{ form.lien }}</a>
+        - {% if form.rubrique == "2" %}Rubrique 2 - Les acteurs du marché{% else %}Rubrique 1 - Actualités de l'immobilier logistique{% endif %}</p>
+      <div class="grid">
+        <div class="field field-wide">
+          <label for="titre">Titre</label>
+          <input type="text" id="titre" name="titre" value="{{ form.titre or '' }}" maxlength="300" required
+                 {% if error_field == "titre" %}aria-invalid="true" aria-describedby="titre-err"{% endif %}>
+          {% if error_field == "titre" %}<p class="field-error" id="titre-err">{{ error }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="acteur">Acteur</label>
+          <select id="acteur" name="acteur" class="actor-select" data-other="autre-field">
+            <option value="">- Aucun -</option>
+            {% for b in actor_list %}
+              <option value="{{ b.id }}" {% if form.acteur == b.id|string %}selected{% endif %}>{{ b.name }}</option>
+            {% endfor %}
+            <option value="{{ other_actor }}" {% if form.acteur == other_actor %}selected{% endif %}>Autre...</option>
+          </select>
+        </div>
+        <div class="field" id="autre-field">
+          <label for="autre">Autre acteur</label>
+          <input type="text" id="autre" name="acteur_autre" value="{{ form.acteur_autre or '' }}" maxlength="100"
+                 {% if error_field == "acteur_autre" %}aria-invalid="true" aria-describedby="autre-err"{% endif %}>
+          {% if error_field == "acteur_autre" %}<p class="field-error" id="autre-err">{{ error }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="surface">Surface (m²)</label>
+          <input type="text" id="surface" name="surface" inputmode="numeric" value="{{ form.surface or '' }}" maxlength="12"
+                 {% if error_field == "surface" %}aria-invalid="true" aria-describedby="surface-err"{% endif %}>
+          {% if error_field == "surface" %}<p class="field-error" id="surface-err">{{ error }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="date">Date</label>
+          <input type="date" id="date" name="date" value="{{ form.date or '' }}"
+                 {% if error_field == "date" %}aria-invalid="true" aria-describedby="date-err"{% endif %}>
+          {% if error_field == "date" %}<p class="field-error" id="date-err">{{ error }}</p>{% endif %}
+        </div>
+        <div class="field">
+          <label for="source">Source</label>
+          <input type="text" id="source" name="source" value="{{ form.source or '' }}" maxlength="120" required
+                 {% if error_field == "source" %}aria-invalid="true" aria-describedby="source-err"{% endif %}>
+          {% if error_field == "source" %}<p class="field-error" id="source-err">{{ error }}</p>{% endif %}
+        </div>
+        <div class="field field-wide">
+          <label for="extrait">Premières lignes</label>
+          <textarea id="extrait" name="extrait" rows="4" maxlength="1000" aria-describedby="extrait-aide">{{ form.extrait or '' }}</textarea>
+          <p class="help" id="extrait-aide">Texte repris de l'article : vous pouvez le couper ou corriger une faute, mais pas le réécrire.</p>
+        </div>
+        <label class="check"><input type="checkbox" name="transaction" {% if form.transaction %}checked{% endif %}> Transaction (bail signé, acquisition, cession, livraison...)</label>
+        {% if refused %}
+          <div class="field field-wide confirm-box">
+            <label class="check"><input type="checkbox" name="confirme" {% if form.confirme %}checked{% endif %}
+              {% if error_field == "confirme" %}aria-invalid="true" aria-describedby="confirme-err"{% endif %}>
+              J'ai ouvert ce lien dans mon navigateur et il affiche bien l'article</label>
+            {% if error_field == "confirme" %}<p class="field-error" id="confirme-err">{{ error }}</p>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary">Enregistrer l'article</button>
+      <a class="btn" href="{{ url_for('review.add_article', month=newsletter.month, rubrique=form.rubrique) }}">Changer de lien</a>
+    </form>
+  {% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='review.js') }}" defer></script>{% endblock %}

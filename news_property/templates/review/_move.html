@@ -1,0 +1,17 @@
+{# Déplacements rapides. Variables : action, filtre, position, total, label (ex. « l'article »). #}
+<form method="post" action="{{ action }}" class="inline" aria-label="Déplacer {{ label }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="filtre" value="{{ filtre }}">
+  <button type="submit" name="sens" value="tete" class="btn btn-small" {% if position == 0 %}disabled{% endif %}>⤒ En tête</button>
+  <button type="submit" name="sens" value="haut" class="btn btn-small" {% if position == 0 %}disabled{% endif %}>↑ Monter</button>
+  <button type="submit" name="sens" value="bas" class="btn btn-small" {% if position == total - 1 %}disabled{% endif %}>↓ Descendre</button>
+  <button type="submit" name="sens" value="fin" class="btn btn-small" {% if position == total - 1 %}disabled{% endif %}>⤓ En fin</button>
+</form>
+<form method="post" action="{{ action }}" class="inline rank-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="filtre" value="{{ filtre }}">
+  <input type="hidden" name="sens" value="rang">
+  <label for="{{ rank_id }}">Rang</label>
+  <input type="number" id="{{ rank_id }}" name="rang" min="1" max="{{ total }}" value="{{ position + 1 }}" class="rank-input">
+  <button type="submit" class="btn btn-small">Placer</button>
+</form>

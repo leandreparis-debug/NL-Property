@@ -17,12 +17,12 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 5 sur 10)** : socle technique (configuration, journal, sécurité,
+> **État actuel (étape 6 sur 10)** : socle technique (configuration, journal, sécurité,
 > page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
 > locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
-> veille, collecte de la veille, détection des transactions et des surfaces. Les étapes
-> suivantes ajoutent la relecture, le contenu interne, l'aperçu, l'e-mail et la
-> démonstration.
+> veille, collecte de la veille, détection des transactions et des surfaces, relecture
+> des articles. Les étapes suivantes ajoutent le contenu interne, l'aperçu, l'e-mail et
+> la démonstration.
 
 ## Prérequis
 
@@ -227,6 +227,75 @@ interrogés sur Google Actualités se règlent dans le bloc `google_news.topics`
 `config\sources.yaml`. Les changements s'appliquent aux collectes suivantes ; les articles
 déjà collectés ne sont pas reclassés.
 
+## Relire la newsletter
+
+Une fois la veille collectée, la relecture permet en quelques minutes de choisir ce qui ira
+dans la newsletter, de corriger et d'ordonner.
+
+### Pas à pas
+
+1. **Accueil → Relire.** La page « Newsletters » liste les mois, du plus récent au plus
+   ancien, avec leur statut (Brouillon, Relue, Exportée) et le nombre d'articles retenus.
+   Cliquez sur **Relire** devant un mois, ou choisissez un mois puis **Ouvrir ou créer ce
+   mois**.
+2. **Deux onglets de veille** : *1. Immobilier logistique* et *2. Acteurs du marché* (les
+   onglets du contenu interne arrivent à l'étape 7). Chaque onglet affiche un compteur
+   « retenus / limite ». Il passe **en orange** quand la limite est dépassée : c'est un
+   avertissement, rien n'est bloqué. Un rappel indique que la version imprimée doit tenir
+   en 4 pages A4.
+3. **Filtres** : *Tout*, *Retenus*, *Non retenus*, *Transactions*.
+4. **Vue compacte.** Chaque article tient sur une ligne : rang, bouton **Retenir**, acteur,
+   titre, source, date, surface, badge « Transaction ».
+   - **Modifier** déplie le formulaire complet de l'article.
+   - **Tout déplier / Tout replier** ouvre ou ferme tous les formulaires.
+5. **Retenir.** Un seul bouton, sur la ligne de l'article : **Retenir** pour garder l'article
+   dans la newsletter, **✓ Retenu - ne plus retenir** pour l'en retirer (il reste visible,
+   en grisé).
+6. **Ordonner** : **⤒ En tête**, **↑ Monter**, **↓ Descendre**, **⤓ En fin**, ou tapez un
+   numéro dans **Rang** puis **Placer** (un numéro trop grand place l'article en dernier).
+   **Ne retenir que les N premiers** (N = limite de la rubrique) retient les N premiers
+   articles dans l'ordre affiché et retire les suivants.
+7. **Corriger** (dans **Modifier**) : **Titre**, **Acteur** (les acteurs suivis, ou
+   « Autre... » avec un nom libre), **Surface (m²)**, **Date**, **Source**, **Premières
+   lignes** (elles peuvent être coupées ou corrigées, **pas réécrites** : elles doivent rester
+   fidèles à l'article), la case **Transaction**, puis **Enregistrer cet article**.
+
+   Si le repère « Transaction » a été posé automatiquement, la phrase qui l'a déclenché est
+   affichée. Une fois modifié à la main, la détection n'y touche plus. **Le lien de
+   l'article n'est pas modifiable.**
+8. **Rien ne se perd.** Une carte modifiée et pas encore enregistrée affiche
+   « Modifications non enregistrées » ; quitter la page à ce moment-là fait apparaître une
+   demande de confirmation du navigateur. Si un enregistrement est refusé (titre vide, date
+   impossible...), la page revient avec **toute votre saisie** et le message à côté du champ
+   à corriger.
+9. **Changer de rubrique** (dans **Modifier**) : **Déplacer vers la rubrique 2** (l'acteur
+   est alors obligatoire) ou **vers la rubrique 1**. L'article se place en fin de la rubrique
+   choisie.
+10. **Supprimer...** demande une confirmation, puis efface l'article. Pour l'écarter
+    simplement, préférez « Ne plus retenir ».
+11. **+ Ajouter un article à la main** : collez le lien d'un article trouvé vous-même, puis
+    **Vérifier le lien**. L'application lit le titre et les premières lignes, vous complétez
+    le reste, puis vous enregistrez.
+    - Un lien qui ne répond pas, ou qui ne commence pas par http(s), est refusé.
+    - Si le site **refuse la lecture automatique** (protection anti-robot) : ouvrez le lien
+      dans votre navigateur, saisissez titre et premières lignes, puis cochez **« J'ai ouvert
+      ce lien dans mon navigateur et il affiche bien l'article »**. L'article porte alors la
+      mention **« Lien vérifié par l'utilisateur »**.
+12. **Marquer comme relue** (en haut à droite) passe la newsletter au statut « Relue ». Des
+    avertissements s'affichent si une rubrique dépasse sa limite ou si elle est vide.
+    **Repasser en brouillon** permet de revenir en arrière.
+
+Après chaque action, un message confirme ce qui a été fait, ou explique pourquoi c'est
+refusé, et la page revient sur l'élément concerné. Tout fonctionne sans JavaScript et au
+clavier : touche Tab, avec un lien « Aller au contenu » en premier.
+
+### Limites par rubrique
+
+Les limites sont dans **`config\limites.yaml`** (commenté) : rubrique 1 = 6, rubrique 2 =
+8, visites = 4, événements = 8, absences = 12, pages = 4 au départ. Modifiez le fichier puis
+rechargez la page : inutile de relancer l'application. Si le fichier est absent, ces valeurs
+s'appliquent ; s'il est invalide, un message l'indique en haut de la page.
+
 ## Transactions et surfaces
 
 Après chaque collecte, l'application propose automatiquement :
@@ -400,6 +469,7 @@ NewsProperty/
 │   ├── acteurs.yaml        # Référentiel des acteurs suivis (immobilier logistique)
 │   ├── regles_veille.yaml  # Mots-clés de tri de la veille (rubrique 1, exclusions)
 │   ├── regles_detection.yaml # Règles « transaction » et surface
+│   ├── limites.yaml        # Limites éditoriales par rubrique
 │   ├── sources.example.yaml  # Format documenté de config/sources.yaml
 │   ├── theme.yaml          # Charte graphique de la newsletter (couleurs du logo)
 │   └── assets/             # Logos Carrefour Property (couleurs, réserve blanche)
@@ -436,6 +506,7 @@ NewsProperty/
 │   │   ├── runner.py       # Orchestrateur run_collection()
 │   │   └── views.py        # Pages web /collecte
 │   ├── detect/             # Détection : règles, phrases, transactions, surfaces, rapports
+│   ├── review/             # Relecture : limites, actions (service.py), pages (views.py)
 │   ├── tools/
 │   │   ├── diagnose_sources.py  # Outil de diagnostic des sources
 │   │   ├── collect.py      # Collecte en ligne de commande
@@ -445,7 +516,7 @@ NewsProperty/
 │   ├── fonts.py            # Police système pour les images générées
 │   ├── newsletter/         # Thème (theme.py), formes de la charte (shapes.py), pages
 │   ├── templates/          # Gabarits Jinja2
-│   └── static/             # Feuille de style de l'application
+│   └── static/             # Feuille de style de l'application, review.js (confort)
 └── tests/
     ├── conftest.py         # Fixtures (données dans tmp_path, réseau interdit)
     ├── helpers.py          # Application de test, jeton CSRF, thème de test, HTTP simulé
@@ -464,7 +535,8 @@ NewsProperty/
     ├── test_collect_units.py
     ├── test_collect_runner.py
     ├── test_collect_web.py
-    └── test_detection.py   # dont les cas étiquetés de fixtures/detection_cases.yaml
+    ├── test_detection.py   # dont les cas étiquetés de fixtures/detection_cases.yaml
+    └── test_review.py      # Interface de relecture
 ```
 
 ## Conventions de développement

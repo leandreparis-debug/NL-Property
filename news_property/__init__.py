@@ -16,6 +16,7 @@ from news_property.config import Settings, load_settings
 from news_property.dates import format_month_fr
 from news_property.db import connection as db_connection
 from news_property.newsletter.views import bp as newsletter_bp
+from news_property.review.views import bp as review_bp
 from news_property.security import init_security
 from news_property.ui import ui_context
 from news_property.version import __version__
@@ -47,6 +48,7 @@ def create_app(settings: Settings | None = None, actors_file: Path | None = None
     db_connection.init_app(app)
     init_security(app, settings)
     app.register_blueprint(collect_bp)
+    app.register_blueprint(review_bp)
     app.register_blueprint(newsletter_bp)
 
     @app.context_processor

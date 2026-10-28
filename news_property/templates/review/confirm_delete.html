@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Confirmer la suppression - News Property{% endblock %}
+{% block content %}
+  <h1>Supprimer {{ what }} ?</h1>
+  <p><strong>{{ label }}</strong></p>
+  <p class="help">{{ note }}</p>
+  <form method="post" action="{{ action }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+    <a class="btn" href="{{ cancel }}">Non, revenir</a>
+  </form>
+{% endblock %}
