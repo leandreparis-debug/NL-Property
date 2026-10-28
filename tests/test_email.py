@@ -274,7 +274,7 @@ def test_apps_script_matches_package_format() -> None:
     assert "remplacerLien_(raw, paquet.printLinkToken, lienPdf)" in script
     assert "const PARTAGE_PDF = 'DOMAINE';" in script
     assert ".send(" not in script and "sendEmail" not in script
-    assert "—" not in script and "–" not in script
+    assert "\u2014" not in script and "\u2013" not in script  # pas de tirets longs
     manifest = json.loads((PROJECT / "apps_script" / "appsscript.json").read_text("utf-8"))
     services = manifest["dependencies"]["enabledAdvancedServices"]
     assert {"userSymbol": "Gmail", "serviceId": "gmail", "version": "v1"} in services

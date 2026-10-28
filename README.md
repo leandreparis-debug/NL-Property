@@ -17,14 +17,12 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 9 sur 10)** : socle technique (configuration, journal, sécurité,
-> page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
-> locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
-> veille, collecte de la veille, détection des transactions et des surfaces, relecture
-> des articles, contenu interne (Une, visites d'entrepôts avec photos, calendrier,
-> congés et absences, documents utiles), aperçu de la newsletter avec impression, export
-> e-mail pour Gmail (brouillon créé par un script Apps Script, version PDF à imprimer).
-> La dernière étape ajoute le mois de démonstration et les vérifications finales.
+> **Application complète** : configuration, journal et sécurité ; base de données locale
+> avec migrations et référentiel des acteurs suivis ; diagnostic des sources de veille ;
+> collecte de la veille ; détection des transactions et des surfaces ; relecture des
+> articles ; contenu interne (Une, visites d'entrepôts avec photos, calendrier, congés et
+> absences, documents utiles) ; aperçu et impression ; export e-mail pour Gmail (brouillon
+> créé par un script Apps Script, version PDF à imprimer) ; mois de démonstration.
 
 ## Prérequis
 
@@ -228,6 +226,19 @@ le cas d'Argan, pour ne pas confondre avec l'huile d'argan, ou de GLP). Les thè
 interrogés sur Google Actualités se règlent dans le bloc `google_news.topics` de
 `config\sources.yaml`. Les changements s'appliquent aux collectes suivantes ; les articles
 déjà collectés ne sont pas reclassés.
+
+## Essayer sans collecte réelle : la démonstration
+
+Double-cliquez sur **`demo.bat`** (ou lancez `python -m news_property.tools.demo --reset`).
+Il crée la newsletter fictive de **janvier 2000** : articles marqués « [DÉMO] » dont les
+liens mènent à `example.com`, deux visites d'entrepôts avec des photos générées
+(marquées « DÉMO »), trois rendez-vous, trois absences et deux liens vers des documents
+fictifs. Les textes sont inventés et ne décrivent aucun fait réel. Aucun autre mois n'est
+touché ; relancer `demo.bat` recrée le mois à l'identique.
+
+Ouvrez ensuite l'application : **Newsletters → Relire** devant Janvier 2000, puis
+**Aperçu**, **Imprimer** et **Exporter** pour parcourir toute la chaîne avant la première
+vraie collecte.
 
 ## Relire la newsletter
 
@@ -576,6 +587,7 @@ NewsProperty/
 ├── tests.bat               # Lancement des tests
 ├── diagnostiquer_sources.bat # Diagnostic des sources de veille
 ├── collecter_veille.bat    # Collecte de la veille d'un mois
+├── demo.bat                # Mois de démonstration (janvier 2000)
 ├── requirements.txt        # Dépendances d'exécution (versions exactes)
 ├── requirements-dev.txt    # Dépendances de test et de lint (inclut requirements.txt)
 ├── pyproject.toml          # Métadonnées du projet, configuration de pytest et de ruff
@@ -635,7 +647,8 @@ NewsProperty/
 │   │   ├── diagnose_sources.py  # Outil de diagnostic des sources
 │   │   ├── collect.py      # Collecte en ligne de commande
 │   │   ├── detect.py       # Détection en ligne de commande
-│   │   └── evaluate_detection.py  # Rapport de fiabilité de la détection
+│   │   ├── evaluate_detection.py  # Rapport de fiabilité de la détection
+│   │   └── demo.py         # Newsletter de démonstration (janvier 2000)
 │   ├── ui.py               # Menu, cartes de l'accueil, variables du thème
 │   ├── fonts.py            # Police système pour les images générées
 │   ├── newsletter/         # Thème (theme.py), formes (shapes.py), dates en français,
@@ -668,7 +681,8 @@ NewsProperty/
     ├── test_content.py     # Contenu interne (Une, visites et photos, calendrier...)
     ├── test_newsletter.py  # Dates, vue de la newsletter, QR codes, aperçu
     ├── test_email.py       # E-mail Gmail, paquet, pages d'export
-    └── test_pdf.py         # Version PDF à imprimer
+    ├── test_pdf.py         # Version PDF à imprimer
+    └── test_demo.py        # Mois de démonstration
 ```
 
 ## Conventions de développement

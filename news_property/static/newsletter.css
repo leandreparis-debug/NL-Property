@@ -306,10 +306,46 @@ body.nl-page {
 .nl-footer-logo { display: block; width: 120px; height: auto; margin: 0 auto 10px; }
 
 @media print {
+  /* Version A4 compacte : l'objectif est de tenir en 4 pages (config/limites.yaml). */
   @page { size: A4; margin: 12mm; }
   body.nl-page { background: #fff; }
   .preview-bar { display: none; }
-  .nl { max-width: none; margin: 0; }
+  .nl { max-width: none; margin: 0; font-size: 13px; line-height: 1.4; }
   .nl-band, .nl-tagline, .nl-figure, .nl-event, .nl-documents { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .nl-section-head { break-after: avoid; }
+  .nl-band { padding: 22px 32px 18px; }
+  .nl-logo { width: 130px; margin-bottom: 10px; }
+  .nl-title { font-size: 30px; }
+  .nl-month { font-size: 18px; }
+  .nl-motif-wrap svg { width: 150px; height: auto; }
+  .nl-tagline { padding: 8px 32px; font-size: 12px; }
+  .nl-une { padding: 14px 32px 4px; }
+  .nl-une-title { font-size: 17px; }
+  .nl-figures { margin-top: 10px; gap: 10px; }
+  .nl-figure { padding: 10px 14px; border-radius: 10px; }
+  .nl-figure-value { font-size: 30px; }
+  .nl-figure-label { font-size: 12px; }
+  .nl-toc { margin: 10px 32px 0; padding: 10px 16px; border-radius: 10px; }
+  .nl-toc-title { margin-bottom: 6px; font-size: 13px; }
+  .nl-toc-list { gap: 4px 20px; }
+  .nl-section { padding: 14px 32px 0; }
+  .nl-section-head { margin-bottom: 8px; break-after: avoid; break-inside: avoid; }
+  .nl-section-number { flex-basis: 40px; height: 44px; font-size: 20px; border-radius: 20px 20px 0 0; }
+  .nl-section-title { font-size: 17px; }
+  .nl-article { padding: 8px 0; }
+  .nl-article-title { font-size: 15px; margin-bottom: 4px; }
+  .nl-article-body { gap: 10px; }
+  .nl-qr { flex-basis: 58px; }
+  .nl-qr svg { width: 50px; height: 50px; }
+  .nl-visit { padding: 8px 0; gap: 14px; }
+  .nl-photo { flex-basis: 170px; }
+  .nl-photo img { width: 170px; height: 150px; border-radius: 85px 85px 0 0; }
+  .nl-thumbs img { width: 70px; height: 52px; }
+  .nl-visit-text { padding-top: 4px; }
+  .nl-item-title { font-size: 15px; }
+  .nl-event { padding: 8px 10px; }
+  .nl-absence { padding: 5px 0; }
+  .nl-documents { padding: 12px 14px; gap: 8px 14px; }
+  .nl-button { padding: 7px 14px; }
+  .nl-footer { margin-top: 14px; padding: 12px 32px 8px; break-inside: avoid; }
+  .nl-footer-logo { width: 90px; margin-bottom: 6px; }
 }
