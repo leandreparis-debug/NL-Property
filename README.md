@@ -17,13 +17,13 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 7 sur 10)** : socle technique (configuration, journal, sécurité,
+> **État actuel (étape 8 sur 10)** : socle technique (configuration, journal, sécurité,
 > page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
 > locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
 > veille, collecte de la veille, détection des transactions et des surfaces, relecture
 > des articles, contenu interne (Une, visites d'entrepôts avec photos, calendrier,
-> congés et absences, documents utiles). Les étapes suivantes ajoutent l'aperçu,
-> l'e-mail et la démonstration.
+> congés et absences, documents utiles), aperçu de la newsletter avec impression. Les
+> étapes suivantes ajoutent l'e-mail et la démonstration.
 
 ## Prérequis
 
@@ -359,6 +359,34 @@ rubrique après confirmation.
 Comme pour les articles, un enregistrement refusé revient avec toute votre saisie et le
 message à côté du champ à corriger ; tout fonctionne sans JavaScript et au clavier.
 
+## Aperçu et impression
+
+Depuis l'écran du mois, le bouton **Aperçu** (en haut à droite) affiche la newsletter telle
+qu'elle sera publiée : mise en page de la version imprimable, fond blanc, environ 800 px de
+large.
+
+- **Seuls les articles retenus** y figurent, dans l'ordre choisi pendant la relecture, avec
+  leur titre et leurs premières lignes copiés tels quels, le badge « Transaction » et la
+  surface quand ils sont connus. Le contenu interne apparaît tel que saisi.
+- En haut, le **bandeau** aux couleurs du logo, puis la **Une** (trois chiffres calculés :
+  visites, rendez-vous, actualités retenues) et le **sommaire**.
+- Les rubriques sont **numérotées sans trou** (01, 02, 03...) : une rubrique vide est
+  masquée et n'est pas comptée. Si tout est vide, l'aperçu l'explique au lieu d'afficher une
+  page blanche.
+- Chaque article porte un **QR code** de son lien, pour lire l'article depuis la version
+  papier. Les QR codes sont mis en cache dans `<données>\exports\qr\`.
+- Les dates sont en français (« 1er octobre 2026 », « du 17 au 19 novembre 2026 »).
+- Le **pied de page** reprend le logo couleur et le texte de `config\theme.yaml`.
+
+**Imprimer** (dans l'aperçu, ou directement depuis l'écran du mois) ouvre la boîte
+d'impression du navigateur : choisissez une imprimante, ou **« Enregistrer au format
+PDF »** pour obtenir un fichier. La barre grise de l'aperçu n'est pas imprimée. Le format
+est A4 avec des marges de 12 mm ; si le document dépasse 4 pages, réduisez le nombre
+d'articles retenus (le compteur de la relecture vous le rappelle).
+
+Si `config\theme.yaml` contient une erreur, l'aperçu l'indique (ligne et valeur fautives)
+au lieu de s'afficher avec de mauvaises couleurs.
+
 ## Transactions et surfaces
 
 Après chaque collecte, l'application propose automatiquement :
@@ -579,9 +607,12 @@ NewsProperty/
 │   │   └── evaluate_detection.py  # Rapport de fiabilité de la détection
 │   ├── ui.py               # Menu, cartes de l'accueil, variables du thème
 │   ├── fonts.py            # Police système pour les images générées
-│   ├── newsletter/         # Thème (theme.py), formes de la charte (shapes.py), pages
-│   ├── templates/          # Gabarits Jinja2
-│   └── static/             # Feuille de style de l'application, review.js (confort)
+│   ├── newsletter/         # Thème (theme.py), formes (shapes.py), dates en français,
+│   │                       # QR codes (qr.py), vue (view.py), aperçu et pages (views.py)
+│   ├── templates/          # Gabarits Jinja2 (newsletter/_*.html : communs à l'aperçu
+│   │                       # et aux exports)
+│   └── static/             # style.css (application), newsletter.css (newsletter),
+│   │                       # review.js et print.js (confort, optionnels)
 └── tests/
     ├── conftest.py         # Fixtures (données dans tmp_path, réseau interdit)
     ├── helpers.py          # Application de test, jeton CSRF, thème de test, HTTP simulé
@@ -602,7 +633,8 @@ NewsProperty/
     ├── test_collect_web.py
     ├── test_detection.py   # dont les cas étiquetés de fixtures/detection_cases.yaml
     ├── test_review.py      # Interface de relecture
-    └── test_content.py     # Contenu interne (Une, visites et photos, calendrier...)
+    ├── test_content.py     # Contenu interne (Une, visites et photos, calendrier...)
+    └── test_newsletter.py  # Dates, vue de la newsletter, QR codes, aperçu
 ```
 
 ## Conventions de développement

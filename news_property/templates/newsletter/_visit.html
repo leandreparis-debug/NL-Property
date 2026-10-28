@@ -1,0 +1,52 @@
+{# Visite d'entrepôt (rubrique 3) : photo principale en arche (forme de la charte) ; les
+   autres photos en vignettes si show_other_photos (choix de la sortie, selon la place). #}
+{% set photo_alt = "Visite : " ~ item.site_name %}
+{% if medium == "email" %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td style="{{ st.item }}">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          {% if item.main_photo %}
+            <td width="260" valign="top" style="padding:0 20px 0 0;">
+              <img src="{{ photo_src[item.main_photo.file_name] }}" width="260" height="240" alt="{{ item.main_photo.caption or photo_alt }}" style="{{ st.photo }}">
+              {% if item.main_photo.caption %}<p style="{{ st.caption }}">{{ item.main_photo.caption }}</p>{% endif %}
+            </td>
+          {% endif %}
+          <td valign="top" style="padding:10px 0 0;">
+            <p style="{{ st.item_title }}">{{ item.site_name }}</p>
+            <p style="{{ st.meta }}">{{ item.location }}{% if item.owner %} · {{ item.owner }}{% endif %}{% if item.surface_label %} · {{ item.surface_label }}{% endif %}</p>
+            {% if item.date_label %}<p style="{{ st.meta }}">Visite du {{ item.date_label }}</p>{% endif %}
+            {% if item.description %}<p style="{{ st.text }}">{% for line in item.description_lines %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% endif %}
+            {% if show_other_photos and item.other_photos %}
+              <p style="margin:10px 0 0;">{% for photo in item.other_photos %}<img src="{{ photo_src[photo.file_name] }}" width="92" height="70" alt="{{ photo.caption or photo_alt }}" style="{{ st.thumb }}{% if not loop.last %}margin-right:8px;{% endif %}">{% endfor %}</p>
+            {% endif %}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+{% else %}
+<article class="nl-visit">
+  {% if item.main_photo %}
+    <figure class="nl-photo">
+      <img src="{{ photo_src[item.main_photo.file_name] }}" alt="{{ item.main_photo.caption or photo_alt }}">
+      {% if item.main_photo.caption %}<figcaption>{{ item.main_photo.caption }}</figcaption>{% endif %}
+    </figure>
+  {% endif %}
+  <div class="nl-visit-text">
+    <h3 class="nl-item-title">{{ item.site_name }}</h3>
+    <p class="nl-meta">{{ item.location }}{% if item.owner %} · {{ item.owner }}{% endif %}{% if item.surface_label %} · {{ item.surface_label }}{% endif %}</p>
+    {% if item.date_label %}<p class="nl-date">Visite du {{ item.date_label }}</p>{% endif %}
+    {% if item.description %}<p>{% for line in item.description_lines %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% endif %}
+    {% if show_other_photos and item.other_photos %}
+      <div class="nl-thumbs">
+        {% for photo in item.other_photos %}
+          <img src="{{ photo_src[photo.file_name] }}" alt="{{ photo.caption or photo_alt }}">
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</article>
+{% endif %}

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aperçu - {{ theme.name }} - {{ view.month_label }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='newsletter.css') }}">
+  <style>:root { {{ theme_css }} }</style>
+</head>
+<body class="nl-page">
+  <div class="preview-bar">
+    <a href="{{ url_for('review.month_home', month=view.month) }}">← Retour à la relecture</a>
+    <span>Aperçu de la version imprimable - {{ view.month_label }}</span>
+    <button type="button" id="imprimer" class="print-button">Imprimer</button>
+  </div>
+  {% include "newsletter/_newsletter.html" %}
+  <script src="{{ url_for('static', filename='print.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{# Documents utiles (rubrique 6, jusqu'à 6 liens) : un bouton par lien dans un même
+   encadré. En version imprimée, chaque adresse est aussi écrite en clair. #}
+{% if medium == "email" %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr><td style="{{ st.documents }}">
+    {% for item in section.items %}
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:{{ '0' if loop.first else '10px' }} 0 0;">
+        <tr><td bgcolor="{{ theme.colors.secondary }}" style="{{ st.button_cell }}"><a href="{{ item.url }}" style="{{ st.button }}">{{ item.label }} →</a></td></tr>
+      </table>
+    {% endfor %}
+  </td></tr>
+</table>
+{% else %}
+<div class="nl-documents">
+  {% for item in section.items %}
+    <div class="nl-documents-item">
+      <a class="nl-button" href="{{ item.url }}" rel="noopener noreferrer">{{ item.label }} →</a>
+      {% if medium == "print" %}<p class="nl-url">{{ item.url }}</p>{% endif %}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}

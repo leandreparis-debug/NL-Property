@@ -1,0 +1,34 @@
+{# Calendrier à venir (rubrique 4) : cartes compactes sur deux colonnes ; un rendez-vous
+   accompagné d'un résumé prend toute la largeur (rangées préparées en Python). #}
+{% if medium == "email" %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  {% for row in section.event_rows %}
+    <tr>
+      {% for item in row %}
+        <td {% if not item.wide %}width="50%"{% endif %} {% if item.wide %}colspan="2"{% endif %} style="padding:0 {{ '5px' if loop.first and not item.wide else '0' }} 10px {{ '0' if loop.first else '5px' }};vertical-align:top;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="{{ st.card_cell }}border-left:4px solid {{ accent.color }};">
+              <p style="{{ st.strong }}">{{ item.title }}</p>
+              {% if item.date_label %}<p style="{{ st.meta }}">{{ item.date_label }}</p>{% endif %}
+              {% if item.location %}<p style="{{ st.meta }}">{{ item.location }}</p>{% endif %}
+              {% if item.summary %}<p style="{{ st.text }}">{% for line in item.summary_lines %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% endif %}
+            </td></tr>
+          </table>
+        </td>
+      {% endfor %}
+      {% if row|length == 1 and not row[0].wide %}<td width="50%"></td>{% endif %}
+    </tr>
+  {% endfor %}
+</table>
+{% else %}
+<ul class="nl-events">
+  {% for item in section.items %}
+    <li class="nl-event{% if item.wide %} nl-event-wide{% endif %}">
+      <strong>{{ item.title }}</strong>
+      {% if item.date_label %}<span class="nl-date">{{ item.date_label }}</span>{% endif %}
+      {% if item.location %}<span class="nl-meta">{{ item.location }}</span>{% endif %}
+      {% if item.summary %}<span class="nl-summary">{% for line in item.summary_lines %}{{ line }}{% if not loop.last %}<br>{% endif %}{% endfor %}</span>{% endif %}
+    </li>
+  {% endfor %}
+</ul>
+{% endif %}

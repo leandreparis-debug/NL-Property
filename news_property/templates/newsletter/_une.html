@@ -1,0 +1,38 @@
+{# Une : trois chiffres calculés (visites d'entrepôts, rendez-vous à venir, actualités
+   retenues), chacun avec la forme et la couleur de sa rubrique. Un chiffre dont la
+   rubrique est vide n'a pas de lien (la rubrique n'est pas publiée). #}
+{% if medium == "email" %}
+<tr>
+  <td style="{{ st.block }}">
+    <p style="{{ st.une_title }}">{{ view.front_title }}</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 18px;"><tr><td width="44" height="3" bgcolor="{{ accents['une'].color }}" style="{{ st.rule }}">&nbsp;</td></tr></table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        {% for figure in view.front %}
+          <td width="33%" style="{{ st.tile }}">
+            <img src="{{ front_icon_src[loop.index0] }}" width="22" height="22" alt="" style="display:block;border:0;">
+            <p style="{{ st.figure_value }}">{{ figure.value }}</p>
+            <p style="{{ st.figure_label }}">{{ figure.label }}</p>
+          </td>
+          {% if not loop.last %}<td width="12" style="font-size:0;line-height:0;">&nbsp;</td>{% endif %}
+        {% endfor %}
+      </tr>
+    </table>
+  </td>
+</tr>
+{% else %}
+{% set une = accents["une"] %}
+<section class="nl-une" aria-labelledby="nl-une-titre" style="--accent: {{ une.color }};">
+  <h2 class="nl-une-title" id="nl-une-titre">{{ view.front_title }}</h2>
+  <span class="nl-rule"></span>
+  <div class="nl-figures">
+    {% for figure in view.front %}
+      {% if figure.anchor and medium == "print" %}<a class="nl-figure" href="#{{ figure.anchor }}">{% else %}<div class="nl-figure">{% endif %}
+        <span class="nl-figure-icon">{{ front_icons[loop.index0] }}</span>
+        <span class="nl-figure-value">{{ figure.value }}</span>
+        <span class="nl-figure-label">{{ figure.label }}</span>
+      {% if figure.anchor and medium == "print" %}</a>{% else %}</div>{% endif %}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}

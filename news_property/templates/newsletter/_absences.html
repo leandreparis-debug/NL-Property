@@ -1,0 +1,24 @@
+{# Congés et absences de l'équipe (rubrique 5) : une ligne par personne, période en toutes
+   lettres, motif s'il est connu. #}
+{% if medium == "email" %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  {% for item in section.items %}
+    <tr>
+      <td style="{{ st.absence_cell }}{% if not loop.last %}border-bottom:1px solid {{ theme.colors.border }};{% endif %}">
+        <p style="{{ st.strong }}">{{ item.person }}</p>
+        <p style="{{ st.meta }}">{{ item.period_label }}{% if item.reason %} · {{ item.reason }}{% endif %}</p>
+      </td>
+    </tr>
+  {% endfor %}
+</table>
+{% else %}
+<ul class="nl-absences">
+  {% for item in section.items %}
+    <li class="nl-absence">
+      <strong>{{ item.person }}</strong>
+      <span class="nl-date">{{ item.period_label }}</span>
+      {% if item.reason %}<span class="nl-meta">{{ item.reason }}</span>{% endif %}
+    </li>
+  {% endfor %}
+</ul>
+{% endif %}

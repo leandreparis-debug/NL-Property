@@ -1,0 +1,46 @@
+{# Sommaire : rubriques publiées seulement, numérotées sur deux chiffres, avec leur nombre
+   d'éléments et la forme de la rubrique. #}
+{% if medium == "email" %}
+<tr>
+  <td style="padding:18px 32px 6px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td style="{{ st.toc }}">
+          <p style="{{ st.toc_title }}">Sommaire</p>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            {% for row in view.toc|batch(2) %}
+              <tr>
+                {% for entry in row %}
+                  <td width="26" style="{{ st.toc_cell }}"><img src="{{ icon_src[entry.key] }}" width="22" height="22" alt="" style="display:block;border:0;"></td>
+                  <td width="26" style="{{ st.toc_cell }}"><span style="{{ st.toc_number }}">{{ entry.number_label }}</span></td>
+                  <td style="{{ st.toc_cell }}">
+                    <p style="{{ st.toc_title_item }}">{{ entry.title }}</p>
+                    <p style="{{ st.toc_count }}">{{ entry.count_label }}</p>
+                  </td>
+                {% endfor %}
+                {% if row|length == 1 %}<td colspan="3"></td>{% endif %}
+              </tr>
+            {% endfor %}
+          </table>
+        </td>
+      </tr>
+    </table>
+  </td>
+</tr>
+{% else %}
+<nav class="nl-toc" aria-label="Sommaire">
+  <h2 class="nl-toc-title">Sommaire</h2>
+  <ol class="nl-toc-list">
+    {% for entry in view.toc %}
+      <li>
+        <span class="nl-toc-icon">{{ icons[entry.key] }}</span>
+        <span class="nl-toc-number">{{ entry.number_label }}</span>
+        <span class="nl-toc-text">
+          {% if medium == "print" %}<a href="#{{ entry.anchor }}">{{ entry.title }}</a>{% else %}{{ entry.title }}{% endif %}
+          <span class="nl-toc-count">{{ entry.count_label }}</span>
+        </span>
+      </li>
+    {% endfor %}
+  </ol>
+</nav>
+{% endif %}

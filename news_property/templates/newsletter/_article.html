@@ -1,0 +1,31 @@
+{# Fiche actualité (rubriques 1 et 2). Titre et extrait copiés tels quels ; QR code du lien
+   sous le titre en version imprimée ; badge « Transaction » et surface si connus. #}
+{% if medium == "email" %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td style="{{ st.item }}">
+      {% if item.actor %}<p style="{{ st.kicker }}">{{ item.actor }}</p>{% endif %}
+      <p style="{{ st.item_title }}"><a href="{{ item.url }}" style="{{ st.link }}">{{ item.title }}</a></p>
+      <p style="{{ st.meta }}">{{ item.source }}{% if item.date_label %} · {{ item.date_label }}{% endif %}{% if item.surface_label %} · {{ item.surface_label }}{% endif %}</p>
+      {% if item.transaction %}<p style="margin:0 0 8px;"><span style="{{ st.badge }}">{{ transaction_label }}</span></p>{% endif %}
+      {% if item.excerpt %}<p style="{{ st.text }}">{{ item.excerpt }}</p>{% endif %}
+      <p style="margin:0;"><a href="{{ item.url }}" style="{{ st.more }}">Lire l'article →</a></p>
+    </td>
+  </tr>
+</table>
+{% else %}
+<article class="nl-article">
+  {% if item.actor %}<p class="nl-kicker">{{ item.actor }}</p>{% endif %}
+  <h3 class="nl-article-title"><a href="{{ item.url }}" rel="noopener noreferrer">{{ item.title }}</a></h3>
+  <div class="nl-article-body">
+    {% if medium == "print" %}
+      <div class="nl-qr">{{ qr[item.url] }}</div>
+    {% endif %}
+    <div class="nl-article-text">
+      <p class="nl-meta">{{ item.source }}{% if item.date_label %} · {{ item.date_label }}{% endif %}{% if item.surface_label %} · {{ item.surface_label }}{% endif %}</p>
+      {% if item.transaction %}<p><span class="nl-badge">{{ transaction_label }}</span></p>{% endif %}
+      {% if item.excerpt %}<p class="nl-excerpt">{{ item.excerpt }}</p>{% endif %}
+    </div>
+  </div>
+</article>
+{% endif %}

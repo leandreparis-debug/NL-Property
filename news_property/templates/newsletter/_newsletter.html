@@ -1,0 +1,86 @@
+{# Corps de la newsletter, commun à l'aperçu et aux exports.
+   Variables : view (NewsletterView), theme, medium ("email" ou "print"), qr, photo_src,
+   logo_src, logo_reverse_src, accents, icons, front_icons, motif, transaction_label,
+   show_other_photos. Aucune logique métier ici : tout est préparé en Python. #}
+{% if medium == "email" %}
+<table role="presentation" width="{{ width }}" cellpadding="0" cellspacing="0" border="0" align="center" style="{{ st.card }}">
+  <tr>
+    <td bgcolor="{{ theme.colors.primary }}" style="{{ st.band }}">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td valign="top" style="{{ st.band_text }}">
+            <img src="{{ logo_reverse_src }}" width="170" alt="{{ theme.logo_alt }}" style="display:block;width:170px;height:auto;border:0;margin:0 0 18px;">
+            <p style="{{ st.title }}">{{ theme.name }}</p>
+            <p style="{{ st.month }}">{{ view.month_label }}</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;"><tr><td width="44" height="3" bgcolor="{{ theme.colors.background }}" style="{{ st.rule }}">&nbsp;</td></tr></table>
+          </td>
+          <td width="210" valign="top" align="right" style="padding:0;">
+            <img src="{{ motif_src }}" width="210" height="225" alt="" style="display:block;width:210px;height:225px;border:0;">
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  {# Un e-mail ne peut pas lancer l'impression : le lien ouvre la version PDF. #}
+  <tr><td style="{{ st.tagline }}">{{ theme.tagline }}{% if print_href %} - <a href="{{ print_href }}" style="{{ st.link }}text-decoration:underline;">voir la version à imprimer</a>{% endif %}</td></tr>
+  {% include "newsletter/_une.html" %}
+  {% include "newsletter/_sommaire.html" %}
+  {% for section in view.visible_sections %}
+    {% set accent = accents[section.key] %}
+    <tr>
+      <td style="{{ st.block }}">
+        {% include "newsletter/_section_header.html" %}
+        {% if section.kind == "articles" %}
+          {% for item in section.items %}{% include "newsletter/_article.html" %}{% endfor %}
+        {% elif section.kind == "visits" %}
+          {% for item in section.items %}{% include "newsletter/_visit.html" %}{% endfor %}
+        {% elif section.kind == "events" %}
+          {% include "newsletter/_events.html" %}
+        {% elif section.kind == "absences" %}
+          {% include "newsletter/_absences.html" %}
+        {% elif section.kind == "documents" %}
+          {% include "newsletter/_documents.html" %}
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  <tr><td height="24" style="font-size:0;line-height:0;">&nbsp;</td></tr>
+  {% include "newsletter/_footer.html" %}
+</table>
+{% else %}
+<div class="nl nl-{{ medium }}">
+  <header class="nl-header">
+    <div class="nl-band">
+      <div class="nl-motif-wrap">{{ motif }}</div>
+      <img class="nl-logo" src="{{ logo_reverse_src }}" alt="{{ theme.logo_alt }}">
+      <p class="nl-title">{{ theme.name }}</p>
+      <p class="nl-month">{{ view.month_label }}</p>
+      <span class="nl-band-rule"></span>
+    </div>
+    <p class="nl-tagline">{{ theme.tagline }}</p>
+  </header>
+
+  {% include "newsletter/_une.html" %}
+  {% include "newsletter/_sommaire.html" %}
+
+  {% for section in view.visible_sections %}
+    {% set accent = accents[section.key] %}
+    <section class="nl-section" id="{{ section.anchor }}" style="--accent: {{ accent.color }}; --on-accent: {{ accent.on_color }};">
+      {% include "newsletter/_section_header.html" %}
+      {% if section.kind == "articles" %}
+        {% for item in section.items %}{% include "newsletter/_article.html" %}{% endfor %}
+      {% elif section.kind == "visits" %}
+        {% for item in section.items %}{% include "newsletter/_visit.html" %}{% endfor %}
+      {% elif section.kind == "events" %}
+        {% include "newsletter/_events.html" %}
+      {% elif section.kind == "absences" %}
+        {% include "newsletter/_absences.html" %}
+      {% elif section.kind == "documents" %}
+        {% include "newsletter/_documents.html" %}
+      {% endif %}
+    </section>
+  {% endfor %}
+
+  {% include "newsletter/_footer.html" %}
+</div>
+{% endif %}

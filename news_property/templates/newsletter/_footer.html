@@ -1,0 +1,17 @@
+{# Pied de page : logo en couleurs, en bas et centré (charte), texte de config/theme.yaml. #}
+{% if medium == "email" %}
+<tr>
+  <td align="center" style="{{ st.footer }}">
+    <img src="{{ logo_src }}" width="120" alt="{{ theme.logo_alt }}" style="display:block;width:120px;height:auto;border:0;margin:0 auto 10px;">
+    <p style="{{ st.footer_text }}">{{ theme.footer_text }}</p>
+    <p style="{{ st.footer_text }}">{{ theme.name }} · {{ view.month_label }}</p>
+    {% if print_href %}<p style="{{ st.footer_text }}margin-top:8px;"><a href="{{ print_href }}" style="{{ st.link }}text-decoration:underline;">Version à imprimer (PDF)</a></p>{% endif %}
+  </td>
+</tr>
+{% else %}
+<footer class="nl-footer">
+  <img class="nl-footer-logo" src="{{ logo_src }}" alt="{{ theme.logo_alt }}">
+  <p>{{ theme.footer_text }}</p>
+  <p class="nl-footer-month">{{ theme.name }} · {{ view.month_label }}</p>
+</footer>
+{% endif %}
