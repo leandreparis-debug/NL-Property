@@ -17,11 +17,11 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 3 sur 10)** : socle technique (configuration, journal, sécurité,
+> **État actuel (étape 4 sur 10)** : socle technique (configuration, journal, sécurité,
 > page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
 > locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
-> veille. Les étapes suivantes ajoutent la collecte, la détection, la relecture, le
-> contenu interne, l'aperçu, l'e-mail et la démonstration.
+> veille, collecte de la veille. Les étapes suivantes ajoutent la détection, la
+> relecture, le contenu interne, l'aperçu, l'e-mail et la démonstration.
 
 ## Prérequis
 
@@ -149,6 +149,82 @@ La configuration se fait par variables d'environnement, ou plus simplement dans 
 Une valeur invalide arrête l'application avec un message qui nomme la variable fautive. Le
 fichier `.env` n'est pas versionné : n'y mettez rien qui doive être partagé. Aucun secret
 n'est écrit dans le code.
+
+## Collecter la veille
+
+La collecte lit les sources activées dans `config\sources.yaml` (flux RSS des sites et, si
+activé, Google Actualités pour chaque thème puis pour chaque acteur suivi). Elle ne garde
+que les articles **publiés pendant le mois choisi** (heure de Paris) et les classe :
+
+- **rubrique 2** (les acteurs du marché) si le titre ou le résumé cite un acteur de
+  `config\acteurs.yaml` (nom ou autre écriture) ;
+- **rubrique 1** (actualités de l'immobilier logistique) sinon, s'il contient un terme de
+  `config\regles_veille.yaml` (entrepôt, plateforme logistique, parc logistique...) ;
+- les autres articles sont écartés.
+
+Pour chaque article retenu, elle enregistre le titre, la source, la date, le **lien
+d'origine** (jamais inventé) et les premières lignes de l'article (environ 300 caractères,
+copiées telles quelles depuis la page, jamais reformulées). Tout le texte venant des sites
+est converti en texte brut.
+
+### Lancer une collecte
+
+- **Depuis l'application** : bouton **Collecter la veille** sur la page d'accueil.
+  Choisissez le mois (par défaut le mois précédent, puisque la newsletter est préparée en
+  début de mois pour le mois écoulé) puis **Lancer la collecte**. La page de suivi se met à
+  jour toute seule, puis affiche le bilan.
+- **En double-cliquant sur `collecter_veille.bat`** : il demande le mois (Entrée = mois
+  précédent), puis affiche l'avancement et le bilan.
+- **En ligne de commande** :
+
+  ```bat
+  .venv\Scripts\python.exe -m news_property.tools.collect --month 2026-10
+  ```
+
+Une seule collecte peut tourner à la fois ; une deuxième demande est refusée avec un
+message. Relancer la collecte d'un mois **ajoute uniquement les nouveaux articles** : la
+sélection, les corrections et l'ordre déjà faits ne sont jamais modifiés.
+
+Prérequis : `config\sources.yaml` doit exister (voir « Tester les sources de veille »).
+S'il manque, la collecte ne démarre pas et l'application explique comment le créer.
+
+### Lire le bilan
+
+| Ligne | Signification |
+|---|---|
+| Articles ajoutés, rubrique 1 / 2 | Nouveaux articles enregistrés, prêts à être relus |
+| Doublons ignorés | Article déjà présent ce mois-ci : même lien (après nettoyage des paramètres `utm_*`...) ou titre quasi identique pour le même acteur |
+| Articles hors période | Publiés en dehors du mois choisi |
+| Articles sans date | Le flux ne donne pas de date : écartés, faute de pouvoir vérifier le mois |
+| Articles hors sujet | Ni acteur suivi, ni terme de l'immobilier logistique |
+| Par source | Entrées lues et articles ajoutés pour chaque source configurée |
+
+### Si une source est en erreur
+
+Une source en erreur n'arrête pas la collecte : les autres sources sont traitées, le bilan
+indique « Terminée, avec des sources en erreur » et donne la raison en français (ex. « Le
+site n'a pas répondu à temps », « Le site a refusé l'accès (HTTP 403) »).
+
+1. Relancez la collecte un peu plus tard : seuls les articles manquants seront ajoutés.
+2. Si l'erreur persiste plusieurs jours, relancez `diagnostiquer_sources.bat` pour vérifier
+   la source, puis désactivez-la (`enabled: false`) dans `config\sources.yaml` si elle n'est
+   plus exploitable.
+3. Le détail technique est dans `%LOCALAPPDATA%\NewsProperty\logs\news_property.log`.
+
+### Ajuster le tri
+
+Les listes de mots-clés sont dans **`config\regles_veille.yaml`** (commenté) :
+
+- `topic_terms` : termes qui envoient un article en rubrique 1 ;
+- `exclusions` : expressions à ne pas compter (« entrepôt de données », « logistique
+  militaire »...).
+
+Pour un acteur dont le nom est aussi un mot courant ou un sigle court, mettez
+`case_sensitive: true` dans `config\acteurs.yaml` : la majuscule initiale sera exigée (c'est
+le cas d'Argan, pour ne pas confondre avec l'huile d'argan, ou de GLP). Les thèmes
+interrogés sur Google Actualités se règlent dans le bloc `google_news.topics` de
+`config\sources.yaml`. Les changements s'appliquent aux collectes suivantes ; les articles
+déjà collectés ne sont pas reclassés.
 
 ## Tester les sources de veille
 
@@ -278,6 +354,7 @@ NewsProperty/
 ├── lancer.bat              # Lancement en double-clic (crée/met à jour .venv)
 ├── tests.bat               # Lancement des tests
 ├── diagnostiquer_sources.bat # Diagnostic des sources de veille
+├── collecter_veille.bat    # Collecte de la veille d'un mois
 ├── requirements.txt        # Dépendances d'exécution (versions exactes)
 ├── requirements-dev.txt    # Dépendances de test et de lint (inclut requirements.txt)
 ├── pyproject.toml          # Métadonnées du projet, configuration de pytest et de ruff
@@ -287,6 +364,7 @@ NewsProperty/
 ├── README.md
 ├── config/
 │   ├── acteurs.yaml        # Référentiel des acteurs suivis (immobilier logistique)
+│   ├── regles_veille.yaml  # Mots-clés de tri de la veille (rubrique 1, exclusions)
 │   ├── sources.example.yaml  # Format documenté de config/sources.yaml
 │   ├── theme.yaml          # Charte graphique de la newsletter (couleurs du logo)
 │   └── assets/             # Logos Carrefour Property (couleurs, réserve blanche)
@@ -313,8 +391,17 @@ NewsProperty/
 │   │   ├── candidates.py   # Sites candidats, thèmes et acteurs pour Google Actualités
 │   │   ├── discovery.py    # Découverte des flux d'un site
 │   │   └── evaluation.py   # Évaluation d'un flux, Google Actualités, verdicts
+│   ├── collect/            # Collecteur de veille
+│   │   ├── config.py       # Lecture de sources.yaml et regles_veille.yaml
+│   │   ├── feeds.py        # Lecture des flux (sites, Google Actualités)
+│   │   ├── matching.py     # Détection des acteurs et des mots-clés, classement
+│   │   ├── urls.py         # Normalisation des liens (dédoublonnage)
+│   │   ├── excerpt.py      # Premières lignes et texte brut des articles
+│   │   ├── runner.py       # Orchestrateur run_collection()
+│   │   └── views.py        # Pages web /collecte
 │   ├── tools/
-│   │   └── diagnose_sources.py  # Outil de diagnostic des sources
+│   │   ├── diagnose_sources.py  # Outil de diagnostic des sources
+│   │   └── collect.py      # Collecte en ligne de commande
 │   ├── ui.py               # Menu, cartes de l'accueil, variables du thème
 │   ├── fonts.py            # Police système pour les images générées
 │   ├── newsletter/         # Thème (theme.py), formes de la charte (shapes.py), pages
@@ -334,7 +421,10 @@ NewsProperty/
     ├── test_http_client.py
     ├── test_discovery.py
     ├── test_evaluation.py
-    └── test_diagnose_sources.py
+    ├── test_diagnose_sources.py
+    ├── test_collect_units.py
+    ├── test_collect_runner.py
+    └── test_collect_web.py
 ```
 
 ## Conventions de développement

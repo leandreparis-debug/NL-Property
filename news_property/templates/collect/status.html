@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Collecte {{ month_label }} - News Property{% endblock %}
+{% block head %}{% if refresh %}<meta http-equiv="refresh" content="{{ refresh }}">{% endif %}{% endblock %}
+{% block content %}
+  <h1>Collecte de la veille : {{ month_label }}</h1>
+
+  {% if job.state == "running" %}
+    <p class="alert info">Collecte en cours... cette page se met à jour toute seule.</p>
+    {% if job.progress %}
+      <p>Source {{ job.progress.index }} sur {{ job.progress.total }} :
+        <strong>{{ job.progress.source }}</strong></p>
+      <progress max="{{ job.progress.total }}" value="{{ job.progress.index }}"></progress>
+      <p>Entrées lues : {{ job.progress.entries_read }} - articles ajoutés : {{ job.progress.added }}</p>
+    {% else %}
+      <p>Préparation...</p>
+    {% endif %}
+  {% elif job.state == "error" %}
+    <p class="alert">{{ job.error }}</p>
+  {% endif %}
+
+  {% if summary %}
+    {% include "collect/_summary.html" %}
+  {% endif %}
+
+  <p><a href="{{ url_for('collect.index', mois=job.month) }}">Nouvelle collecte</a> ·
+     <a href="{{ url_for('index') }}">Retour à l'accueil</a></p>
+{% endblock %}

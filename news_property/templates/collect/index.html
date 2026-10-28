@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Collecter la veille - News Property{% endblock %}
+{% block content %}
+  <h1>Collecter la veille</h1>
+  <p>La collecte lit les sources activées dans <code>config/sources.yaml</code> et ajoute les
+    articles publiés pendant le mois choisi. Les articles déjà présents (sélection, corrections,
+    ordre) ne sont jamais modifiés.</p>
+
+  {% if error %}<p class="alert">{{ error }}</p>{% endif %}
+  {% if config_error %}<p class="alert">{{ config_error }}</p>{% endif %}
+
+  {% if job %}
+    <p class="alert info">Une collecte ({{ job.month }}) est en cours.
+      <a href="{{ url_for('collect.status') }}">Voir l'avancement</a></p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('collect.start') }}" class="collect-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="mois">Mois de la newsletter</label>
+    <input type="month" id="mois" name="mois" value="{{ month }}" required>
+    <button type="submit" {% if config_error or job %}disabled{% endif %}>Lancer la collecte</button>
+  </form>
+
+  {% if last_run %}
+    <h2>Dernière collecte de {{ month_label }}</h2>
+    <p>Lancée le {{ last_run.started_at.astimezone().strftime("%d/%m/%Y à %H:%M") }}.</p>
+    {% with summary = last_run %}{% include "collect/_summary.html" %}{% endwith %}
+  {% endif %}
+
+  <p><a href="{{ url_for('index') }}">Retour à l'accueil</a></p>
+{% endblock %}

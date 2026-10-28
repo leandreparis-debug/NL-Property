@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Site A - Actualités de l'immobilier logistique</title>
+    <link>https://site-a.example/</link>
+    <description>Actualités</description>
+    <item>
+      <title>Prologis livre son 100e entrepôt en France</title>
+      <link>https://site-a.example/articles/prologis-100e-entrepot?utm_source=rss&amp;utm_medium=feed</link>
+      <pubDate>Sat, 10 Oct 2026 08:00:00 +0200</pubDate>
+      <description><![CDATA[<p>Le développeur <b>accélère</b>.</p><script>alert('x')</script>]]></description>
+    </item>
+    <item>
+      <title>Un nouveau parc logistique dans la Loire</title>
+      <link>https://site-a.example/articles/nouveau-parc-loire</link>
+      <pubDate>Mon, 05 Oct 2026 09:00:00 +0200</pubDate>
+      <description>Un investisseur régional lance les travaux.</description>
+    </item>
+    <item>
+      <title>L'entrepôt de données du CHU migre en 2027</title>
+      <link>https://site-a.example/articles/entrepot-donnees</link>
+      <pubDate>Sat, 03 Oct 2026 09:00:00 +0200</pubDate>
+      <description>Le système informatique change de prestataire.</description>
+    </item>
+    <item>
+      <title>Météo : un week-end ensoleillé</title>
+      <link>https://site-a.example/articles/meteo</link>
+      <pubDate>Fri, 02 Oct 2026 09:00:00 +0200</pubDate>
+      <description>Beau temps sur toute la France.</description>
+    </item>
+    <item>
+      <title>Les entrepôts à l'honneur au salon de septembre</title>
+      <link>https://site-a.example/articles/salon-septembre</link>
+      <pubDate>Tue, 15 Sep 2026 09:00:00 +0200</pubDate>
+      <description>Retour sur le salon.</description>
+    </item>
+    <item>
+      <title>Un entrepôt témoin (article sans date)</title>
+      <link>https://site-a.example/articles/sans-date</link>
+      <description>Visite.</description>
+    </item>
+    <item>
+      <title>Plateforme logistique : un bail signé le soir d'Halloween</title>
+      <link>https://site-a.example/articles/halloween-paris</link>
+      <pubDate>Sat, 31 Oct 2026 23:30:00 +0100</pubDate>
+      <description>Signature à 23 h 30, heure de Paris.</description>
+    </item>
+    <item>
+      <title>Plateforme logistique : un bail signé à minuit UTC</title>
+      <link>https://site-a.example/articles/halloween-utc</link>
+      <pubDate>Sat, 31 Oct 2026 23:30:00 +0000</pubDate>
+      <description>Signature à 23 h 30 UTC, soit le 1er novembre à Paris.</description>
+    </item>
+  </channel>
+</rss>

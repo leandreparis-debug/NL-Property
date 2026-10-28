@@ -1,0 +1,57 @@
+# Règles de tri de la veille (collecte automatique).
+#
+# Chaque entrée de flux est classée ainsi :
+#   1. elle cite un acteur suivi (nom ou alias de config/acteurs.yaml)
+#      → rubrique 2 « Les acteurs du marché » ;
+#   2. sinon, elle contient un des « topic_terms » ci-dessous
+#      → rubrique 1 « Actualités de l'immobilier logistique » ;
+#   3. sinon, elle est écartée (comptée dans le bilan).
+# Seuls le titre et le résumé fournis par le flux sont examinés.
+#
+# Comparaison : la casse, les accents et le type d'apostrophe (' ou ’) ne comptent pas ;
+# l'expression doit être un mot entier (« entrepôt » ne trouve pas « entreposage ») ;
+# le pluriel en s ou x du dernier mot est accepté (« entrepôt » trouve « entrepôts »).
+# Quand le pluriel change plusieurs mots (« parc logistique » / « parcs logistiques »),
+# indiquez les deux formes.
+#
+# Pour ajouter un mot-clé : ajoutez une ligne « - mot ou expression » dans la liste,
+# avec la même indentation (2 espaces, pas de tabulation), puis relancez la collecte.
+# Les articles déjà collectés ne sont pas reclassés.
+
+# Termes qui signalent un article sur l'immobilier logistique (rubrique 1).
+topic_terms:
+  - entrepôt
+  - immobilier logistique
+  - plateforme logistique
+  - plateformes logistiques
+  - parc logistique
+  - parcs logistiques
+  - bâtiment logistique
+  - bâtiments logistiques
+  - site logistique
+  - sites logistiques
+  - base logistique
+  - bases logistiques
+  - hub logistique
+  - hubs logistiques
+  - logistique urbaine
+  - messagerie
+  - cross-dock
+  - foncier logistique
+  - actif logistique
+  - actifs logistiques
+  - portefeuille logistique
+
+# Expressions qui NE comptent PAS comme immobilier logistique (faux positifs).
+# Elles sont retirées du texte avant la recherche des termes ci-dessus : un article qui ne
+# parle que d'« entrepôt de données » (informatique) est écarté, mais un article qui cite
+# aussi un « parc logistique » reste en rubrique 1.
+exclusions:
+  - entrepôt de données
+  - entrepôts de données
+  - logistique militaire
+  - soutien logistique
+  - logistique électorale
+  - messagerie électronique
+  - messagerie instantanée
+  - messagerie vocale

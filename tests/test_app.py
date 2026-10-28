@@ -84,9 +84,12 @@ def test_sidebar_menu_marks_the_current_section(client: FlaskClient) -> None:
 
 def test_menu_hides_the_functions_not_delivered_yet(client: FlaskClient) -> None:
     html = html_of(client.get("/"))
-    delivered = [label for _, label, endpoint in NAV if endpoint in ("index", "newsletter.theme")]
-    assert delivered == ["Accueil", "Thème"]
-    assert 'href="/collecte/"' not in html
+    nav = html[html.index('<nav class="side-nav"') : html.index("</nav>")]
+    delivered = {"index", "collect.index", "newsletter.theme"}
+    for _, label, endpoint in NAV:
+        assert (label in nav) == (endpoint in delivered), label
+    assert 'href="/collecte/"' in nav
+    assert 'href="/newsletters/"' not in nav
 
 
 @pytest.mark.parametrize(

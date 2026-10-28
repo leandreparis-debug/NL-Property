@@ -1,0 +1,35 @@
+{# Bilan d'une collecte. Variables : summary (status, status_label, started_at, finished_at, stats, errors). #}
+{% set stats = summary.stats %}
+<section class="summary">
+  <h2>Bilan : <span class="status status-{{ summary.status }}">{{ summary.status_label }}</span></h2>
+  <table class="figures">
+    <tr><th>Articles ajoutés, rubrique 1 (immobilier logistique)</th><td>{{ stats.added_rubric_1 or 0 }}</td></tr>
+    <tr><th>Articles ajoutés, rubrique 2 (acteurs du marché)</th><td>{{ stats.added_rubric_2 or 0 }}</td></tr>
+    <tr><th>Doublons ignorés</th><td>{{ stats.duplicates or 0 }}</td></tr>
+    <tr><th>Articles hors période</th><td>{{ stats.out_of_period or 0 }}</td></tr>
+    <tr><th>Articles sans date (écartés)</th><td>{{ stats.without_date or 0 }}</td></tr>
+    <tr><th>Articles hors sujet (écartés)</th><td>{{ stats.off_topic or 0 }}</td></tr>
+    <tr><th>Entrées de flux lues</th><td>{{ stats.entries_read or 0 }}</td></tr>
+  </table>
+
+  {% if stats.sources %}
+    <h3>Par source</h3>
+    <table class="sources">
+      <thead><tr><th>Source</th><th>Entrées lues</th><th>Articles ajoutés</th></tr></thead>
+      <tbody>
+        {% for source in stats.sources %}
+          <tr><td>{{ source.name }}</td><td>{{ source.entries }}</td><td>{{ source.added }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
+  {% if summary.errors %}
+    <h3>Sources en erreur</h3>
+    <ul class="errors">
+      {% for error in summary.errors %}<li>{{ error }}</li>{% endfor %}
+    </ul>
+    <p class="hint">Les autres sources ont bien été collectées. Vous pouvez relancer la collecte
+      plus tard : seuls les nouveaux articles seront ajoutés.</p>
+  {% endif %}
+</section>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Site B</title>
+    <link>https://site-b.example/</link>
+    <description>Actualités</description>
+    <item>
+      <title>Prologis livre son 100e entrepôt en France !</title>
+      <link>https://site-b.example/news/prologis-cent-entrepots</link>
+      <pubDate>Sun, 11 Oct 2026 10:00:00 +0200</pubDate>
+      <description>Même information, autre site.</description>
+    </item>
+    <item>
+      <title>Reprise : Prologis livre son 100e entrepôt en France</title>
+      <link>https://SITE-A.example/articles/prologis-100e-entrepot/#commentaires</link>
+      <pubDate>Sun, 11 Oct 2026 11:00:00 +0200</pubDate>
+      <description>Même URL que le site A, avec fragment et « / » final.</description>
+    </item>
+    <item>
+      <title>Argan livre 10 entrepôts cet automne</title>
+      <link>https://site-b.example/news/argan-10-entrepots</link>
+      <pubDate>Thu, 08 Oct 2026 10:00:00 +0200</pubDate>
+      <description>La foncière poursuit son expansion.</description>
+    </item>
+    <item>
+      <title>Pourquoi l'huile d'argan fait du bien</title>
+      <link>https://site-b.example/news/huile-argan</link>
+      <pubDate>Thu, 08 Oct 2026 11:00:00 +0200</pubDate>
+      <description>Témoignages sur ses bienfaits.</description>
+    </item>
+  </channel>
+</rss>

@@ -11,6 +11,7 @@ from flask.typing import ResponseReturnValue
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
 from news_property.bootstrap import prepare_database
+from news_property.collect.views import bp as collect_bp
 from news_property.config import Settings, load_settings
 from news_property.dates import format_month_fr
 from news_property.db import connection as db_connection
@@ -45,6 +46,7 @@ def create_app(settings: Settings | None = None, actors_file: Path | None = None
     app.config["DEBUG"] = settings.debug
     db_connection.init_app(app)
     init_security(app, settings)
+    app.register_blueprint(collect_bp)
     app.register_blueprint(newsletter_bp)
 
     @app.context_processor
