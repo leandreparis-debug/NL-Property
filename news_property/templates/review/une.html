@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Une {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  {% include "review/_header.html" %}
+  <h2 class="section-title">La Une : {{ month_label }}</h2>
+  <p class="help">Ces chiffres se mettent à jour automatiquement : ils sont calculés à partir des
+    rubriques 3, 4 et 1-2, jamais saisis.</p>
+  <div class="figures-grid">
+    <a class="figure" href="{{ url_for('review.month', month=newsletter.month, tab='visites') }}">
+      <span class="figure-number">{{ figures.visits }}</span>
+      <span class="figure-label">{{ plural(figures.visits, "visite d'entrepôt", "visites d'entrepôts") }}</span>
+      <span class="figure-link">Voir la rubrique 3 →</span>
+    </a>
+    <a class="figure" href="{{ url_for('review.month', month=newsletter.month, tab='calendrier') }}">
+      <span class="figure-number">{{ figures.events }}</span>
+      <span class="figure-label">{{ plural(figures.events, "rendez-vous à venir", "rendez-vous à venir") }}</span>
+      <span class="figure-link">Voir la rubrique 4 →</span>
+    </a>
+    <a class="figure" href="{{ url_for('review.month', month=newsletter.month, tab='rubrique-1') }}">
+      <span class="figure-number">{{ figures.articles }}</span>
+      <span class="figure-label">{{ plural(figures.articles, "actualité retenue", "actualités retenues") }}</span>
+      <span class="figure-link">Voir les rubriques 1 et 2 →</span>
+    </a>
+  </div>
+  <p class="muted">Seuls les articles retenus (rubriques 1 et 2) sont comptés.</p>
+{% endblock %}

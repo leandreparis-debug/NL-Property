@@ -24,6 +24,9 @@ from flask.typing import ResponseReturnValue
 
 from news_property.collect.periods import PARIS, previous_month
 from news_property.collect.views import app_now, month_label
+from news_property.content import service as content_service
+from news_property.content.pages import CONTENT_TABS, tab_context
+from news_property.content.pages import TEMPLATES as CONTENT_TEMPLATES
 from news_property.db.connection import get_db
 from news_property.detect.reporting import format_sqm
 from news_property.http_client import Fetcher
@@ -36,11 +39,15 @@ from news_property.review.service import FormError, LinkError
 bp = Blueprint("review", __name__, url_prefix="/newsletters")
 
 TABS = {"rubrique-1": 1, "rubrique-2": 2}
-# Onglets de l'écran du mois, dans l'ordre de la newsletter (les onglets du contenu interne
-# s'ajoutent à l'étape 7).
+# Onglets de l'écran du mois, dans l'ordre de la newsletter.
 TAB_LABELS = {
+    "une": "Une",
     "rubrique-1": "1. Immobilier logistique",
     "rubrique-2": "2. Acteurs du marché",
+    "visites": "3. Visites d'entrepôts",
+    "calendrier": "4. Calendrier",
+    "absences": "5. Congés et absences",
+    "documents": "6. Documents utiles",
 }
 ARTICLE_FILTERS = {
     "tous": "Tout",
@@ -180,9 +187,14 @@ def _tabs(
 ) -> list[tuple[str, str, int | None, int | None]]:
     """Onglets (clé, libellé, compteur, limite) ; compteur et limite None si sans objet."""
     assert newsletter.id is not None
+    content = content_service.content_counts(conn, newsletter.id)
     numbers: dict[str, tuple[int | None, int | None]] = {
         "rubrique-1": (counts.selected_1, limits.rubrique_1),
         "rubrique-2": (counts.selected_2, limits.rubrique_2),
+        "visites": (content["visites"], limits.visites),
+        "calendrier": (content["calendrier"], limits.evenements),
+        "absences": (content["absences"], limits.absences),
+        "documents": (content["documents"], None),
     }
     return [(key, label, *numbers.get(key, (None, None))) for key, label in TAB_LABELS.items()]
 
@@ -209,6 +221,10 @@ def _render_month(
         "edit": edit,
         "unfold_all": request.args.get("deplier") == "1",
     }
+    if tab in CONTENT_TABS:
+        context.update(tab_context(conn, newsletter, tab, limits))
+        return render_template(CONTENT_TEMPLATES[tab], **context), status
+
     rubric = TABS[tab]
     chosen = chosen if chosen in ARTICLE_FILTERS else "tous"
     items = articles.list_for_rubric(conn, newsletter.id, rubric)

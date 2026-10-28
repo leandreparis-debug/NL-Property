@@ -1,0 +1,40 @@
+{# Champs d'une visite (ajout ou modification). Variables : p, v (visite ou None), edit, item_id. #}
+<div class="grid">
+  <div class="field">
+    <label for="{{ p }}-site">Site visité (entrepôt, plateforme)</label>
+    <input type="text" id="{{ p }}-site" name="site" maxlength="150" required placeholder="Ex. : Plateforme XPO de Saint-Vulbas"
+           value="{{ val(edit, item_id, 'site', v.site_name if v else '') }}" {{ invalid(edit, item_id, 'site', p ~ '-site-err') }}>
+    {{ error(edit, item_id, "site", p ~ "-site-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-lieu">Lieu (ville)</label>
+    <input type="text" id="{{ p }}-lieu" name="lieu" maxlength="150" required placeholder="Ex. : Saint-Vulbas (01)"
+           value="{{ val(edit, item_id, 'lieu', v.location if v else '') }}" {{ invalid(edit, item_id, 'lieu', p ~ '-lieu-err') }}>
+    {{ error(edit, item_id, "lieu", p ~ "-lieu-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-date">Date de la visite (facultative)</label>
+    <input type="date" id="{{ p }}-date" name="date" value="{{ val(edit, item_id, 'date', date_value(v.visit_date) if v else '') }}"
+           {{ invalid(edit, item_id, 'date', p ~ '-date-err') }}>
+    {{ error(edit, item_id, "date", p ~ "-date-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-acteur">Propriétaire ou exploitant (facultatif)</label>
+    <input type="text" id="{{ p }}-acteur" name="acteur" list="acteurs-suivis" maxlength="100"
+           value="{{ val(edit, item_id, 'acteur', v.owner_name if v else '') }}" {{ invalid(edit, item_id, 'acteur', p ~ '-acteur-err') }}>
+    {{ error(edit, item_id, "acteur", p ~ "-acteur-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-surface">Surface (m², facultative)</label>
+    <input type="text" id="{{ p }}-surface" name="surface" inputmode="numeric" maxlength="12"
+           value="{{ val(edit, item_id, 'surface', v.surface_sqm if v else '') }}" {{ invalid(edit, item_id, 'surface', p ~ '-surface-err') }}>
+    {{ error(edit, item_id, "surface", p ~ "-surface-err") }}
+  </div>
+  <div class="field field-wide">
+    <label for="{{ p }}-description">Description courte (facultative)</label>
+    <textarea id="{{ p }}-description" name="description" rows="3" maxlength="400" data-counter="{{ p }}-compteur"
+              aria-describedby="{{ p }}-compteur" {{ invalid(edit, item_id, 'description', p ~ '-description-err') }}>{{ val(edit, item_id, 'description', v.description if v else '') }}</textarea>
+    <p class="help" id="{{ p }}-compteur" aria-live="polite">400 caractères au maximum.</p>
+    {{ error(edit, item_id, "description", p ~ "-description-err") }}
+  </div>
+</div>

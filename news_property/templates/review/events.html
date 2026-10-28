@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% from "review/_macros.html" import val, invalid, error %}
+{% block title %}Calendrier {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  {% set counted_label = "rendez-vous" %}
+  {% include "review/_header.html" %}
+
+  <details class="add-box" {% if not items or (edit and edit.item_id == 0) %}open{% endif %}>
+    <summary>+ Ajouter un rendez-vous au calendrier</summary>
+    {% if edit and edit.item_id == 0 and edit.errors.get("general") %}<p class="field-error" role="alert">{{ edit.errors.general }}</p>{% endif %}
+    <form method="post" action="{{ url_for('content.add_event', month=newsletter.month) }}" class="card-form" {% if edit and edit.item_id == 0 %}data-dirty="1"{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% with p="new", e=None, item_id=0 %}{% include "review/_event_fields.html" %}{% endwith %}
+      <button type="submit" class="btn btn-primary">Ajouter</button>
+    </form>
+  </details>
+
+  {% if items|length > 1 %}
+    <form method="post" action="{{ url_for('content.sort_events', month=newsletter.month) }}" class="toolbar">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn">Classer par date</button>
+      <span class="hint">Les rendez-vous sans date passent en fin de liste.</span>
+    </form>
+  {% endif %}
+
+  {% if not items %}<p class="muted">Aucun rendez-vous saisi pour ce mois.</p>{% endif %}
+
+  {% for e in items %}
+    {% set p = "e" ~ e.id %}
+    {% set editing = edit and edit.item_id == e.id %}
+    <article class="card" id="evenement-{{ e.id }}">
+      <div class="card-line">
+        <span class="card-pos" title="Rang">{{ positions[e.id] + 1 }}</span>
+        <h2 class="card-title">{{ e.title }}</h2>
+        <span class="line-meta">{{ format_period(e.event_date, e.end_date) }}{% if e.location %} · {{ e.location }}{% endif %}</span>
+        <span class="badge badge-unsaved" {% if not editing %}hidden{% endif %}>Modifications non enregistrées</span>
+      </div>
+      {% if e.summary %}<p class="meeting-summary">{{ e.summary }}</p>{% endif %}
+      <div class="card-actions">
+        {% with action=url_for('content.move_event', month=newsletter.month, event_id=e.id), position=positions[e.id], label="le rendez-vous", rank_id=p ~ "-rang", filtre="tous" %}
+          {% include "review/_move.html" %}
+        {% endwith %}
+        <a class="btn btn-small btn-danger" href="{{ url_for('content.delete_event', month=newsletter.month, event_id=e.id) }}">Supprimer...</a>
+      </div>
+      <details class="card-details" {% if unfold_all or editing %}open{% endif %}>
+        <summary>Modifier</summary>
+        <form method="post" action="{{ url_for('content.save_event', month=newsletter.month, event_id=e.id) }}" class="card-form" {% if editing %}data-dirty="1"{% endif %}>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% with item_id=e.id %}{% include "review/_event_fields.html" %}{% endwith %}
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </form>
+      </details>
+    </article>
+  {% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='review.js') }}" defer></script>{% endblock %}

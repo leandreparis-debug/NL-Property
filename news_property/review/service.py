@@ -21,7 +21,14 @@ from news_property.collect.text import html_to_text
 from news_property.collect.urls import clean_url, url_key
 from news_property.http_client import Fetcher
 from news_property.models import Actor, Article, validate_url
-from news_property.repositories import articles, newsletters
+from news_property.repositories import (
+    absences,
+    articles,
+    document_links,
+    events,
+    newsletters,
+    visits,
+)
 from news_property.repositories._common import utcnow
 from news_property.review.limits import Limits
 
@@ -136,6 +143,25 @@ def review_warnings(conn: sqlite3.Connection, newsletter_id: int, limits: Limits
             )
         elif counts.for_rubric(rubric) == 0:
             warnings.append(f"{RUBRIC_TITLES[rubric]} : aucun article retenu, elle sera vide.")
+    visit_count = len(visits.list_for_newsletter(conn, newsletter_id))
+    if visit_count == 0:
+        warnings.append("Aucune visite d'entrepôt saisie : la rubrique 3 sera vide.")
+    elif visit_count > limits.visites:
+        warnings.append(f"Visites : {visit_count} saisies pour une limite de {limits.visites}.")
+    event_count = len(events.list_for_newsletter(conn, newsletter_id))
+    if event_count == 0:
+        warnings.append("Aucun rendez-vous au calendrier : la rubrique 4 sera vide.")
+    elif event_count > limits.evenements:
+        warnings.append(
+            f"Calendrier : {event_count} rendez-vous pour une limite de {limits.evenements}."
+        )
+    absence_count = len(absences.list_for_newsletter(conn, newsletter_id))
+    if absence_count == 0:
+        warnings.append("Aucune absence saisie : la rubrique 5 sera vide.")
+    elif absence_count > limits.absences:
+        warnings.append(f"Absences : {absence_count} saisies pour une limite de {limits.absences}.")
+    if document_links.count(conn, newsletter_id) == 0:
+        warnings.append("Pas de lien vers un document utile : la rubrique 6 sera vide.")
     if warnings:
         warnings.append(f"Rappel : la version imprimée doit tenir en {limits.pages_max} pages A4.")
     return warnings

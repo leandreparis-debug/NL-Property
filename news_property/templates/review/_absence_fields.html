@@ -1,0 +1,27 @@
+{# Champs d'une absence. Variables : p, a (absence ou None), edit, item_id. #}
+<div class="grid">
+  <div class="field">
+    <label for="{{ p }}-nom">Nom</label>
+    <input type="text" id="{{ p }}-nom" name="nom" maxlength="100" required
+           value="{{ val(edit, item_id, 'nom', a.person_name if a else '') }}" {{ invalid(edit, item_id, 'nom', p ~ '-nom-err') }}>
+    {{ error(edit, item_id, "nom", p ~ "-nom-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-date">Du</label>
+    <input type="date" id="{{ p }}-date" name="date" required value="{{ val(edit, item_id, 'date', date_value(a.start_date) if a else '') }}"
+           {{ invalid(edit, item_id, 'date', p ~ '-date-err') }}>
+    {{ error(edit, item_id, "date", p ~ "-date-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-date-fin">Au (facultatif si un seul jour)</label>
+    <input type="date" id="{{ p }}-date-fin" name="date_fin" value="{{ val(edit, item_id, 'date_fin', date_value(a.end_date) if a else '') }}"
+           {{ invalid(edit, item_id, 'date_fin', p ~ '-date-fin-err') }}>
+    {{ error(edit, item_id, "date_fin", p ~ "-date-fin-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-motif">Motif (facultatif)</label>
+    <input type="text" id="{{ p }}-motif" name="motif" maxlength="100" placeholder="Ex. : congés, formation, déplacement"
+           value="{{ val(edit, item_id, 'motif', a.reason if a else '') }}" {{ invalid(edit, item_id, 'motif', p ~ '-motif-err') }}>
+    {{ error(edit, item_id, "motif", p ~ "-motif-err") }}
+  </div>
+</div>

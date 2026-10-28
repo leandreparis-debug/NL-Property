@@ -559,6 +559,7 @@ def test_mark_reviewed_and_back_to_draft(
     assert "marquée comme relue" in html
     assert "7 articles retenus pour une limite de 6" in html
     assert "Rubrique 2 - Les acteurs du marché : aucun article retenu" in html
+    assert "Aucune visite d&#39;entrepôt saisie" in html
     assert "Repasser en brouillon" in html
 
     post_form(web, f"{BASE}/statut", {"statut": "brouillon"})

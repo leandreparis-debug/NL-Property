@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% from "review/_macros.html" import val, invalid, error %}
+{% block title %}Visites {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  {% set counted_label = "visites" %}
+  {% include "review/_header.html" %}
+  <datalist id="acteurs-suivis">
+    {% for b in actor_list %}<option value="{{ b.name }}">{% endfor %}
+  </datalist>
+
+  <details class="add-box" {% if not items or (edit and edit.item_id == 0) %}open{% endif %}>
+    <summary>+ Ajouter une visite d'entrepôt</summary>
+    {% if edit and edit.item_id == 0 and edit.errors.get("general") %}<p class="field-error" role="alert">{{ edit.errors.general }}</p>{% endif %}
+    <form method="post" action="{{ url_for('content.add_visit', month=newsletter.month) }}" class="card-form" {% if edit and edit.item_id == 0 %}data-dirty="1"{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% with p="new", v=None, item_id=0 %}{% include "review/_visit_fields.html" %}{% endwith %}
+      <button type="submit" class="btn btn-primary">Ajouter la visite</button>
+      <p class="help">Les photos s'ajoutent ensuite, sur la fiche de la visite.</p>
+    </form>
+  </details>
+
+  {% if not items %}<p class="muted">Aucune visite saisie pour ce mois.</p>{% endif %}
+
+  {% for v in items %}
+    {% set p = "v" ~ v.id %}
+    {% set editing = edit and edit.item_id == v.id %}
+    {% set pics = photos[v.id] %}
+    <article class="card" id="visite-{{ v.id }}">
+      <div class="card-line">
+        <span class="card-pos" title="Rang">{{ positions[v.id] + 1 }}</span>
+        <span class="line-actor">{{ v.owner_name or "-" }}</span>
+        <h2 class="card-title">{{ v.site_name }} - {{ v.location }}</h2>
+        <span class="line-meta">{% if v.visit_date %}{{ v.visit_date.strftime("%d/%m/%Y") }} · {% endif %}{% if v.surface_sqm %}{{ format_sqm(v.surface_sqm) }} · {% endif %}{{ pics|length }} photo{{ "s" if pics|length > 1 }} / {{ max_photos }}</span>
+        <span class="badge badge-unsaved" {% if not editing %}hidden{% endif %}>Modifications non enregistrées</span>
+      </div>
+      {% if v.description %}<p class="evidence">{{ v.description }}</p>{% endif %}
+
+      <div class="card-actions">
+        {% with action=url_for('content.move_visit', month=newsletter.month, visit_id=v.id), position=positions[v.id], label="la visite", rank_id=p ~ "-rang", filtre="tous" %}
+          {% include "review/_move.html" %}
+        {% endwith %}
+        <a class="btn btn-small btn-danger" href="{{ url_for('content.delete_visit', month=newsletter.month, visit_id=v.id) }}">Supprimer...</a>
+      </div>
+
+      <div class="photos">
+        {% for ph in pics %}
+          <figure class="photo{% if loop.first %} photo-main{% endif %}">
+            <img src="{{ url_for('content.photo_file', file_name=ph.file_name) }}" alt="{{ ph.caption or ('Photo ' ~ loop.index ~ ' de la visite ' ~ v.site_name) }}" loading="lazy">
+            <figcaption>
+              {% if loop.first %}<span class="badge badge-main">★ Photo principale</span>
+              {% else %}
+                <form method="post" action="{{ url_for('content.main_photo', month=newsletter.month, photo_id=ph.id) }}" class="inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="btn btn-small">Choisir comme photo principale</button>
+                </form>
+              {% endif %}
+              <form method="post" action="{{ url_for('content.caption_photo', month=newsletter.month, photo_id=ph.id) }}" class="caption-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label for="ph{{ ph.id }}-legende" class="sr-only">Légende de la photo {{ loop.index }}</label>
+                <input type="text" id="ph{{ ph.id }}-legende" name="legende" value="{{ ph.caption or '' }}" maxlength="200" placeholder="Légende (facultative)">
+                <button type="submit" class="btn btn-small">Enregistrer</button>
+              </form>
+              <a class="btn btn-small btn-danger" href="{{ url_for('content.delete_photo', month=newsletter.month, photo_id=ph.id) }}">Supprimer...</a>
+            </figcaption>
+          </figure>
+        {% endfor %}
+      </div>
+      {% if pics|length < max_photos %}
+        <form method="post" action="{{ url_for('content.upload_photos', month=newsletter.month, visit_id=v.id) }}" enctype="multipart/form-data" class="upload-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label for="{{ p }}-photos">Ajouter des photos (JPEG, PNG ou WebP ; encore {{ max_photos - pics|length }} possible{{ "s" if max_photos - pics|length > 1 }})</label>
+          <input type="file" id="{{ p }}-photos" name="photos" multiple accept="image/jpeg,image/png,image/webp">
+          <button type="submit" class="btn btn-small btn-primary">Envoyer les photos</button>
+        </form>
+      {% else %}
+        <p class="help">Limite de {{ max_photos }} photos atteinte pour cette visite.</p>
+      {% endif %}
+
+      <details class="card-details" {% if unfold_all or editing %}open{% endif %}>
+        <summary>Modifier</summary>
+        {% if editing and edit.errors.get("general") %}<p class="field-error" role="alert">{{ edit.errors.general }}</p>{% endif %}
+        <form method="post" action="{{ url_for('content.save_visit', month=newsletter.month, visit_id=v.id) }}" class="card-form" {% if editing %}data-dirty="1"{% endif %}>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% with item_id=v.id %}{% include "review/_visit_fields.html" %}{% endwith %}
+          <button type="submit" class="btn btn-primary">Enregistrer la visite</button>
+        </form>
+      </details>
+    </article>
+  {% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='review.js') }}" defer></script>{% endblock %}

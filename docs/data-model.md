@@ -11,7 +11,9 @@ via les fonctions de `news_property/repositories/`, qui manipulent les dataclass
    d'origine. Toute URL stockée commence par `http://` ou `https://`. C'est contrôlé deux
    fois : à la construction des dataclasses (`ValueError`) et par une contrainte `CHECK` en
    SQL. Le lien d'un article n'est jamais modifié par `articles.update()`.
-2. **La Une est calculée à la volée.** Ses chiffres ne sont jamais stockés (étape 7).
+2. **La Une est calculée à la volée.** Ses chiffres (visites, rendez-vous, actualités
+   retenues) ne sont jamais stockés : `newsletters.front_page_figures()` les compte à chaque
+   affichage.
 3. **Dates en ISO 8601 (texte).** Date-heure en UTC avec fuseau
    (`2026-10-09T12:00:00+00:00`), date simple `AAAA-MM-JJ`. Le mois d'une newsletter est au
    format `AAAA-MM`.
@@ -23,15 +25,18 @@ via les fonctions de `news_property/repositories/`, qui manipulent les dataclass
    (rubrique d'une newsletter...). Un ajout sans position va en fin de liste ; `reorder()`
    renumérote.
 
-## Tables (schéma v1)
+## Tables (schéma v2)
 
 ```
 newsletters ─┬─< articles >──── actors
-             └─< collection_runs
+             ├─< collection_runs
+             ├─< visits ─< visit_photos
+             ├─< events
+             ├─< absences
+             └─< document_links
 ```
-`─<` : « un à plusieurs ». Les relations depuis `newsletters` sont en `ON DELETE CASCADE`.
-Les tables du contenu interne (visites d'entrepôts et photos, calendrier, absences,
-documents utiles) arrivent avec l'étape 7, par une nouvelle migration.
+`─<` : « un à plusieurs ». Toutes les relations depuis `newsletters` (et de `visits` vers
+`visit_photos`) sont en `ON DELETE CASCADE`.
 
 ### `newsletters` : une newsletter par mois
 | Colonne | Type | Règles |
@@ -83,20 +88,86 @@ en français).
 
 Une ligne `running` sert aussi de verrou : une seule collecte à la fois.
 
+### `visits` : visites d'entrepôts (rubrique 3)
+| Colonne | Type | Règles |
+|---|---|---|
+| `id` | INTEGER | clé primaire |
+| `newsletter_id` | INTEGER | → `newsletters`, CASCADE |
+| `site_name` | TEXT | obligatoire (nom du site ou de l'entrepôt) |
+| `location` | TEXT | obligatoire (commune, département) |
+| `visit_date` | TEXT | `AAAA-MM-JJ`, nullable |
+| `owner_name` | TEXT | propriétaire ou exploitant, nullable |
+| `surface_sqm` | INTEGER | surface en m², nullable, > 0 |
+| `description` | TEXT | quelques lignes de description, nullable |
+| `position` | INTEGER | ordre dans la rubrique |
+
+### `visit_photos` : photos d'une visite (3 au plus par visite, limite dans `limites.yaml`)
+| Colonne | Type | Règles |
+|---|---|---|
+| `id` | INTEGER | clé primaire |
+| `visit_id` | INTEGER | → `visits`, CASCADE |
+| `file_name` | TEXT | nom **relatif** au dossier `<données>/photos/` (ex. `2026-10/5f0c....jpg`), généré par l'application ; jamais un chemin absolu, ni `..`, ni `\`, ni `:` (contrôlé en Python et par `CHECK`) |
+| `caption` | TEXT | légende, nullable |
+| `position` | INTEGER | ordre ; la photo en position 0 est la **photo principale** |
+
+Le fichier image est écrit dans `<données>/photos/<mois>/` après traitement (redressement
+EXIF, suppression des métadonnées, 1600 px au plus, JPEG). Supprimer la ligne supprime le
+fichier ; supprimer une newsletter supprime son dossier de photos.
+
+### `events` : calendrier à venir (rubrique 4)
+| Colonne | Type | Règles |
+|---|---|---|
+| `id` | INTEGER | clé primaire |
+| `newsletter_id` | INTEGER | → `newsletters`, CASCADE |
+| `title` | TEXT | obligatoire |
+| `event_date` | TEXT | `AAAA-MM-JJ`, nullable |
+| `end_date` | TEXT | `AAAA-MM-JJ`, nullable, jamais avant `event_date` |
+| `location` | TEXT | lieu, nullable |
+| `summary` | TEXT | résumé, retours à la ligne conservés, ≤ 1 000 caractères, nullable |
+| `position` | INTEGER | ordre (bouton « Trier par date » renumérote) |
+
+### `absences` : congés et absences de l'équipe (rubrique 5)
+| Colonne | Type | Règles |
+|---|---|---|
+| `id` | INTEGER | clé primaire |
+| `newsletter_id` | INTEGER | → `newsletters`, CASCADE |
+| `person_name` | TEXT | obligatoire |
+| `start_date` | TEXT | obligatoire, `AAAA-MM-JJ` |
+| `end_date` | TEXT | nullable, jamais avant `start_date` |
+| `reason` | TEXT | motif court (congés, formation, déplacement...), nullable |
+| `position` | INTEGER | ordre (bouton « Trier par date » renumérote) |
+
+### `document_links` : documents utiles (rubrique 6)
+| Colonne | Type | Règles |
+|---|---|---|
+| `id` | INTEGER | clé primaire |
+| `newsletter_id` | INTEGER | → `newsletters`, CASCADE |
+| `position` | INTEGER | 1 à 6, unique par newsletter |
+| `label` | TEXT | libellé ≤ 100 caractères, nullable (affiché « Voir le document ») |
+| `url` | TEXT | obligatoire, http(s) ; format vérifié, **jamais appelé** par l'application |
+
+Les six emplacements sont enregistrés d'un bloc (`replace_all`) : un emplacement vide
+n'est pas stocké.
+
 ### `schema_version` : migrations appliquées
 `version` (clé primaire), `name` (nom du fichier), `applied_at`.
 
 Index : clés étrangères, `(newsletter_id, rubric, position)` et
-`(newsletter_id, is_transaction)` sur `articles`.
+`(newsletter_id, is_transaction)` sur `articles`, `(newsletter_id, position)` sur `visits`,
+`events` et `absences`, `(visit_id, position)` sur `visit_photos`.
 
 ## Fonctions de dépôt
 
 | Module | Fonctions |
 |---|---|
-| `newsletters` | `get_or_create`, `get`, `get_by_id`, `list_all`, `set_status`, `delete` |
+| `newsletters` | `get_or_create`, `get`, `get_by_id`, `list_all`, `set_status`, `delete` (avec le dossier de photos), `front_page_figures` |
 | `actors` | `sync_from_yaml`, `list_all`, `get`, `get_by_name`, `get_by_slug` |
 | `articles` | `add` (renvoie `None` si l'URL existe déjà ce mois-ci), `get`, `list_for_rubric`, `list_for_newsletter`, `update` (jamais l'URL), `set_selected`, `set_transaction` (à la main), `apply_auto_transaction` (détection), `move_to_rubric`, `reorder`, `delete` |
 | `collection_runs` | `start`, `finish`, `get`, `last_for_newsletter`, `list_running` |
+| `visits` | `add`, `get`, `list_for_newsletter`, `update`, `reorder`, `delete` ; photos : `add_photo`, `get_photo`, `list_photos`, `reorder_photos`, `set_caption`, `delete_photo`, `remove_photo_file` |
+| `events` | `add`, `get`, `list_for_newsletter`, `update`, `reorder`, `sort_by_date`, `delete` |
+| `absences` | `add`, `get`, `list_for_newsletter`, `update`, `reorder`, `sort_by_date`, `delete` |
+| `document_links` | `list_for_newsletter`, `replace_all`, `count` |
 
 Chaque fonction prend la connexion en premier argument. Dans Flask, la connexion de la
 requête s'obtient par `news_property.db.connection.get_db()` ; ailleurs, par
@@ -108,6 +179,7 @@ grouper plusieurs écritures, utiliser `with transaction(conn):`.
 | Fichier | Contenu |
 |---|---|
 | `0001_initial.sql` | Schéma initial (étape 2) : `newsletters`, `actors`, `articles`, `collection_runs` |
+| `0002_internal_content.sql` | Contenu interne (étape 7) : `visits`, `visit_photos`, `events`, `absences`, `document_links` |
 
 ## Ajouter une migration
 

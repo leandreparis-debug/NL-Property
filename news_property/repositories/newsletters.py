@@ -3,8 +3,16 @@
 from __future__ import annotations
 
 import sqlite3
+from pathlib import Path
 
-from news_property.models import NEWSLETTER_STATUSES, Newsletter, validate_month
+from news_property.db.connection import transaction
+from news_property.models import (
+    NEWSLETTER_STATUSES,
+    FrontPageFigures,
+    Newsletter,
+    validate_month,
+)
+from news_property.repositories import visits
 from news_property.repositories._common import from_iso_datetime, to_iso_datetime, utcnow
 
 _COLUMNS = "id, month, status, created_at, updated_at"
@@ -75,6 +83,34 @@ def set_status(conn: sqlite3.Connection, newsletter_id: int, status: str) -> New
     return newsletter
 
 
-def delete(conn: sqlite3.Connection, newsletter_id: int) -> None:
-    """Supprime une newsletter et, en cascade, tout son contenu."""
-    conn.execute("DELETE FROM newsletters WHERE id = ?", (newsletter_id,))
+def delete(conn: sqlite3.Connection, newsletter_id: int, photos_dir: Path | None = None) -> None:
+    """Supprime une newsletter et, en cascade, tout son contenu.
+
+    Si photos_dir est donné, les fichiers des photos de visite sont aussi supprimés.
+    """
+    with transaction(conn):
+        file_names = [
+            row["file_name"]
+            for row in conn.execute(
+                "SELECT p.file_name FROM visit_photos p "
+                "JOIN visits v ON v.id = p.visit_id WHERE v.newsletter_id = ?",
+                (newsletter_id,),
+            )
+        ]
+        conn.execute("DELETE FROM newsletters WHERE id = ?", (newsletter_id,))
+    if photos_dir is not None:
+        for file_name in file_names:
+            visits.remove_photo_file(photos_dir, file_name)
+
+
+def front_page_figures(conn: sqlite3.Connection, newsletter_id: int) -> FrontPageFigures:
+    """Chiffres de la Une, calculés à la volée : visites d'entrepôts, événements du
+    calendrier et articles de veille retenus."""
+    row = conn.execute(
+        "SELECT"
+        " (SELECT COUNT(*) FROM visits WHERE newsletter_id = :id) AS visits,"
+        " (SELECT COUNT(*) FROM events WHERE newsletter_id = :id) AS events,"
+        " (SELECT COUNT(*) FROM articles WHERE newsletter_id = :id AND selected = 1) AS articles",
+        {"id": newsletter_id},
+    ).fetchone()
+    return FrontPageFigures(visits=row["visits"], events=row["events"], articles=row["articles"])

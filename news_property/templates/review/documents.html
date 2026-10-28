@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "review/_macros.html" import val, invalid, error %}
+{% block title %}Documents utiles {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  {% include "review/_header.html" %}
+  <h2 class="section-title">Liens vers les documents utiles</h2>
+  <p class="help">Jusqu'à {{ document_slots|length }} liens, par exemple un tableau de bord, un planning ou un compte
+    rendu. Ce sont souvent des documents internes (SharePoint, Google Drive) qui demandent une connexion :
+    l'application vérifie seulement que l'adresse commence par http:// ou https://. Testez chaque lien avec « Ouvrir ».</p>
+
+  {% if document_links %}
+    <div class="card plans-current">
+      <p><strong>{{ document_links|length }} lien{{ "s" if document_links|length > 1 }} dans la newsletter</strong>, dans cet ordre :</p>
+      <ol class="plans-list">
+        {% for link in document_links %}
+          <li>
+            <span class="plans-label">{{ link.display_label }}</span>
+            <span class="url">{{ link.url }}</span>
+            <a class="btn btn-small" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">Ouvrir ↗<span class="sr-only"> (nouvel onglet)</span></a>
+          </li>
+        {% endfor %}
+      </ol>
+      <form method="post" action="{{ url_for('content.clear_documents', month=newsletter.month) }}" class="inline">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-danger btn-small">Retirer tous les liens</button>
+      </form>
+    </div>
+  {% else %}
+    <p class="muted">Aucun lien pour l'instant : la rubrique 6 sera vide.</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('content.save_documents', month=newsletter.month) }}" class="card card-form" {% if edit %}data-dirty="1"{% endif %}>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <p class="help">Remplissez seulement les lignes utiles ; une ligne vide est ignorée. Libellé laissé vide :
+      « {{ default_document_label }} ».</p>
+    {% for position, link in document_slots %}
+      {% set url_name = "lien_" ~ position %}
+      {% set label_name = "libelle_" ~ position %}
+      <fieldset class="plans-slot">
+        <legend>Lien {{ position }}</legend>
+        <div class="field">
+          <label for="doc-libelle-{{ position }}">Libellé (ex. « Tableau de bord des entrepôts »)</label>
+          <input type="text" id="doc-libelle-{{ position }}" name="{{ label_name }}" maxlength="100"
+                 value="{{ val(edit, 0, label_name, link.label if link else '') }}" {{ invalid(edit, 0, label_name, 'doc-libelle-' ~ position ~ '-err') }}>
+          {{ error(edit, 0, label_name, "doc-libelle-" ~ position ~ "-err") }}
+        </div>
+        <div class="field">
+          <label for="doc-lien-{{ position }}">Adresse du document (http:// ou https://)</label>
+          <input type="url" id="doc-lien-{{ position }}" name="{{ url_name }}" maxlength="2000" placeholder="https://..."
+                 value="{{ val(edit, 0, url_name, link.url if link else '') }}" {{ invalid(edit, 0, url_name, 'doc-lien-' ~ position ~ '-err') }}>
+          {{ error(edit, 0, url_name, "doc-lien-" ~ position ~ "-err") }}
+        </div>
+      </fieldset>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Enregistrer les liens</button>
+  </form>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='review.js') }}" defer></script>{% endblock %}

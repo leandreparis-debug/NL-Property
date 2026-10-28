@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "review/_macros.html" import val, invalid, error %}
+{% block title %}Congés et absences {{ month_label }} - News Property{% endblock %}
+{% block content %}
+  {% set counted_label = "absences" %}
+  {% include "review/_header.html" %}
+
+  <details class="add-box" {% if not items or (edit and edit.item_id == 0) %}open{% endif %}>
+    <summary>+ Ajouter un congé ou une absence</summary>
+    {% if edit and edit.item_id == 0 and edit.errors.get("general") %}<p class="field-error" role="alert">{{ edit.errors.general }}</p>{% endif %}
+    <form method="post" action="{{ url_for('content.add_absence', month=newsletter.month) }}" class="card-form" {% if edit and edit.item_id == 0 %}data-dirty="1"{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      {% with p="new", a=None, item_id=0 %}{% include "review/_absence_fields.html" %}{% endwith %}
+      <button type="submit" class="btn btn-primary">Ajouter</button>
+    </form>
+  </details>
+
+  {% if items|length > 1 %}
+    <form method="post" action="{{ url_for('content.sort_absences', month=newsletter.month) }}" class="toolbar">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn">Classer par date</button>
+    </form>
+  {% endif %}
+
+  {% if not items %}<p class="muted">Aucune absence saisie pour ce mois.</p>{% endif %}
+
+  {% for a in items %}
+    {% set p = "ab" ~ a.id %}
+    {% set editing = edit and edit.item_id == a.id %}
+    <article class="card" id="absence-{{ a.id }}">
+      <div class="card-line">
+        <span class="card-pos" title="Rang">{{ positions[a.id] + 1 }}</span>
+        <h2 class="card-title">{{ a.person_name }}</h2>
+        <span class="line-meta">{{ format_period(a.start_date, a.end_date) }}{% if a.reason %} · {{ a.reason }}{% endif %}</span>
+        <span class="badge badge-unsaved" {% if not editing %}hidden{% endif %}>Modifications non enregistrées</span>
+      </div>
+      <div class="card-actions">
+        {% with action=url_for('content.move_absence', month=newsletter.month, absence_id=a.id), position=positions[a.id], label="l'absence", rank_id=p ~ "-rang", filtre="tous" %}
+          {% include "review/_move.html" %}
+        {% endwith %}
+        <a class="btn btn-small btn-danger" href="{{ url_for('content.delete_absence', month=newsletter.month, absence_id=a.id) }}">Supprimer...</a>
+      </div>
+      <details class="card-details" {% if unfold_all or editing %}open{% endif %}>
+        <summary>Modifier</summary>
+        <form method="post" action="{{ url_for('content.save_absence', month=newsletter.month, absence_id=a.id) }}" class="card-form" {% if editing %}data-dirty="1"{% endif %}>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          {% with item_id=a.id %}{% include "review/_absence_fields.html" %}{% endwith %}
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </form>
+      </details>
+    </article>
+  {% endfor %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='review.js') }}" defer></script>{% endblock %}

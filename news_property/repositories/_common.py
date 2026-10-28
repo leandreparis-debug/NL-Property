@@ -10,7 +10,7 @@ from news_property.db.connection import transaction
 
 # Tables dont l'ordre d'affichage est géré par une colonne position (noms fixés dans le
 # code, jamais issus de données utilisateur).
-ORDERED_TABLES = frozenset({"articles"})
+ORDERED_TABLES = frozenset({"articles", "visits", "visit_photos", "events", "absences"})
 
 
 def utcnow() -> datetime:

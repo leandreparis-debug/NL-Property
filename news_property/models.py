@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
+from pathlib import PurePosixPath
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -202,3 +203,159 @@ class CollectionRun:
                 f"Statut de collecte invalide : {self.status!r} "
                 f"(attendu : {', '.join(RUN_STATUSES)})."
             )
+
+
+# --------------------------------------------------------------------------- contenu interne
+
+DEFAULT_DOCUMENT_LABEL = "Voir le document"
+MAX_DOCUMENT_LINKS = 6  # rubrique 6 : jusqu'à 6 documents utiles
+DOCUMENT_LABEL_MAX_LENGTH = 100
+
+
+def validate_photo_file_name(file_name: str) -> str:
+    """Vérifie qu'un nom de photo est relatif au dossier photos (jamais un chemin absolu).
+
+    Les sous-dossiers sont acceptés avec « / » (ex. « 2026-10/visite.jpg »).
+    """
+    value = (file_name or "").strip()
+    path = PurePosixPath(value)
+    if (
+        not value
+        or "\\" in value
+        or ":" in value
+        or path.is_absolute()
+        or ".." in value
+        or value.endswith("/")
+    ):
+        raise ValueError(
+            f"Nom de photo invalide : {file_name!r}. Attendu : un nom relatif au dossier "
+            "photos (ex. « visite-lyon.jpg »), sans chemin absolu ni « .. »."
+        )
+    return value
+
+
+@dataclass
+class Visit:
+    """Visite d'entrepôt du mois (rubrique 3, saisie interne)."""
+
+    newsletter_id: int
+    site_name: str
+    location: str
+    visit_date: date | None = None
+    owner_name: str | None = None  # propriétaire ou exploitant, texte libre
+    surface_sqm: int | None = None
+    description: str | None = None
+    position: int | None = None
+    id: int | None = None
+
+    def __post_init__(self) -> None:
+        """Valide le site, le lieu, la surface et la position."""
+        self.site_name = _require_text(self.site_name, "site")
+        self.location = _require_text(self.location, "lieu")
+        if self.surface_sqm is not None and (
+            not isinstance(self.surface_sqm, int) or self.surface_sqm <= 0
+        ):
+            raise ValueError(
+                f"Surface invalide : {self.surface_sqm!r} (nombre entier de m², ou vide)."
+            )
+        _check_position(self.position)
+
+
+@dataclass
+class VisitPhoto:
+    """Photo d'une visite. file_name est relatif à <données>/photos."""
+
+    visit_id: int
+    file_name: str
+    caption: str | None = None
+    position: int | None = None
+    id: int | None = None
+
+    def __post_init__(self) -> None:
+        """Valide le nom de fichier (relatif) et la position."""
+        self.file_name = validate_photo_file_name(self.file_name)
+        _check_position(self.position)
+
+
+@dataclass
+class Event:
+    """Événement du calendrier à venir (rubrique 4, saisie interne)."""
+
+    newsletter_id: int
+    title: str
+    event_date: date | None = None
+    end_date: date | None = None
+    location: str | None = None
+    summary: str | None = None  # jusqu'à 1 000 caractères, retours à la ligne conservés
+    position: int | None = None
+    id: int | None = None
+
+    def __post_init__(self) -> None:
+        """Valide le titre, l'ordre des dates et la position."""
+        self.title = _require_text(self.title, "titre")
+        if self.event_date and self.end_date and self.end_date < self.event_date:
+            raise ValueError("La date de fin est antérieure à la date de début.")
+        _check_position(self.position)
+
+
+@dataclass
+class Absence:
+    """Congé ou absence d'un membre de l'équipe (rubrique 5, saisie interne)."""
+
+    newsletter_id: int
+    person_name: str
+    start_date: date
+    end_date: date | None = None
+    reason: str | None = None  # congés, formation, déplacement...
+    position: int | None = None
+    id: int | None = None
+
+    def __post_init__(self) -> None:
+        """Valide le nom, les dates et la position."""
+        self.person_name = _require_text(self.person_name, "nom")
+        if not isinstance(self.start_date, date):
+            raise ValueError("La date de début est obligatoire.")
+        if self.end_date and self.end_date < self.start_date:
+            raise ValueError("La date de fin est antérieure à la date de début.")
+        _check_position(self.position)
+
+
+@dataclass
+class DocumentLink:
+    """Lien vers un document utile (rubrique 6), par exemple un tableau de bord partagé.
+
+    position va de 1 à 6 ; label None = « Voir le document ». Seul le format de l'URL est
+    vérifié (http/https) : le lien, souvent interne, n'est jamais appelé.
+    """
+
+    newsletter_id: int
+    position: int
+    url: str
+    label: str | None = None
+    id: int | None = None
+
+    def __post_init__(self) -> None:
+        """Valide la position, l'URL et la longueur du libellé."""
+        if not isinstance(self.position, int) or not 1 <= self.position <= MAX_DOCUMENT_LINKS:
+            raise ValueError(
+                f"Position de lien invalide : {self.position!r} (1 à {MAX_DOCUMENT_LINKS})."
+            )
+        self.url = validate_url(self.url, "lien du document")
+        if self.label is not None:
+            self.label = self.label.strip() or None
+        if self.label is not None and len(self.label) > DOCUMENT_LABEL_MAX_LENGTH:
+            raise ValueError(f"Libellé trop long ({DOCUMENT_LABEL_MAX_LENGTH} caractères au plus).")
+
+    @property
+    def display_label(self) -> str:
+        """Libellé affiché (libellé par défaut si vide)."""
+        return self.label or DEFAULT_DOCUMENT_LABEL
+
+
+@dataclass(frozen=True)
+class FrontPageFigures:
+    """Chiffres de la Une, calculés à la volée (jamais stockés)."""
+
+    visits: int = 0
+    events: int = 0
+    articles: int = 0

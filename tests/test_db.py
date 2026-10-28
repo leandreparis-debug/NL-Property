@@ -24,7 +24,18 @@ from tests.helpers import FIXTURES_DIR
 
 LATEST = list_migrations()[-1].version
 
-EXPECTED_TABLES = {"schema_version", "newsletters", "actors", "articles", "collection_runs"}
+EXPECTED_TABLES = {
+    "schema_version",
+    "newsletters",
+    "actors",
+    "articles",
+    "collection_runs",
+    "visits",
+    "visit_photos",
+    "events",
+    "absences",
+    "document_links",
+}
 
 
 def _tables(conn: sqlite3.Connection) -> set[str]:
@@ -114,3 +125,33 @@ def test_transaction_rolls_back(conn: sqlite3.Connection) -> None:
         )
         raise RuntimeError("annulation")
     assert conn.execute("SELECT COUNT(*) FROM newsletters").fetchone()[0] == 0
+
+
+def test_migration_0002_keeps_step_2_data(settings: Settings, tmp_path: Path) -> None:
+    """Une base de l'étape 2 (schéma v1, avec données) passe en dernière version sans perte."""
+    v1 = tmp_path / "migrations_v1"
+    v1.mkdir()
+    shutil.copy(MIGRATIONS_DIR / "0001_initial.sql", v1)
+    assert init_db(settings, v1) == 1
+    with closing(get_connection(settings)) as conn:
+        conn.execute(
+            "INSERT INTO newsletters (id, month, created_at, updated_at)"
+            " VALUES (1, '2026-09', 'x', 'x')"
+        )
+        conn.execute(
+            "INSERT INTO articles (newsletter_id, rubric, title, source_name, url, selected,"
+            " position, collected_at) VALUES (1, 1, 'Titre relu', 'Source',"
+            " 'https://a.example/1', 0, 4, '2026-09-30T10:00:00+00:00')"
+        )
+
+    assert init_db(settings) == LATEST
+
+    with closing(get_connection(settings)) as conn:
+        row = conn.execute("SELECT * FROM articles").fetchone()
+        assert (row["title"], row["selected"], row["position"]) == ("Titre relu", 0, 4)
+        assert conn.execute("SELECT COUNT(*) FROM visits").fetchone()[0] == 0
+        with pytest.raises(sqlite3.IntegrityError):
+            conn.execute(
+                "INSERT INTO document_links (newsletter_id, position, url)"
+                " VALUES (1, 7, 'https://drive.example/x')"
+            )

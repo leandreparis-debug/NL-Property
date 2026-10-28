@@ -17,12 +17,13 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 6 sur 10)** : socle technique (configuration, journal, sécurité,
+> **État actuel (étape 7 sur 10)** : socle technique (configuration, journal, sécurité,
 > page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
 > locale avec migrations et référentiel des acteurs suivis, diagnostic des sources de
 > veille, collecte de la veille, détection des transactions et des surfaces, relecture
-> des articles. Les étapes suivantes ajoutent le contenu interne, l'aperçu, l'e-mail et
-> la démonstration.
+> des articles, contenu interne (Une, visites d'entrepôts avec photos, calendrier,
+> congés et absences, documents utiles). Les étapes suivantes ajoutent l'aperçu,
+> l'e-mail et la démonstration.
 
 ## Prérequis
 
@@ -238,8 +239,10 @@ dans la newsletter, de corriger et d'ordonner.
    ancien, avec leur statut (Brouillon, Relue, Exportée) et le nombre d'articles retenus.
    Cliquez sur **Relire** devant un mois, ou choisissez un mois puis **Ouvrir ou créer ce
    mois**.
-2. **Deux onglets de veille** : *1. Immobilier logistique* et *2. Acteurs du marché* (les
-   onglets du contenu interne arrivent à l'étape 7). Chaque onglet affiche un compteur
+2. **Sept onglets** : *Une*, puis les deux rubriques de veille *1. Immobilier
+   logistique* et *2. Acteurs du marché*, puis le contenu interne *3. Visites
+   d'entrepôts*, *4. Calendrier*, *5. Congés et absences* et *6. Documents utiles* (voir
+   [Contenu interne](#contenu-interne)). Chaque onglet affiche un compteur
    « retenus / limite ». Il passe **en orange** quand la limite est dépassée : c'est un
    avertissement, rien n'est bloqué. Un rappel indique que la version imprimée doit tenir
    en 4 pages A4.
@@ -282,7 +285,8 @@ dans la newsletter, de corriger et d'ordonner.
       ce lien dans mon navigateur et il affiche bien l'article »**. L'article porte alors la
       mention **« Lien vérifié par l'utilisateur »**.
 12. **Marquer comme relue** (en haut à droite) passe la newsletter au statut « Relue ». Des
-    avertissements s'affichent si une rubrique dépasse sa limite ou si elle est vide.
+    avertissements s'affichent si une rubrique dépasse sa limite ou si elle est vide (aucun
+    article retenu, aucune visite, aucun rendez-vous, aucune absence, aucun document).
     **Repasser en brouillon** permet de revenir en arrière.
 
 Après chaque action, un message confirme ce qui a été fait, ou explique pourquoi c'est
@@ -292,9 +296,68 @@ clavier : touche Tab, avec un lien « Aller au contenu » en premier.
 ### Limites par rubrique
 
 Les limites sont dans **`config\limites.yaml`** (commenté) : rubrique 1 = 6, rubrique 2 =
-8, visites = 4, événements = 8, absences = 12, pages = 4 au départ. Modifiez le fichier puis
+8, visites = 4 (3 photos par visite), événements = 8, absences = 12, pages = 4 au départ. Modifiez le fichier puis
 rechargez la page : inutile de relancer l'application. Si le fichier est absent, ces valeurs
 s'appliquent ; s'il est invalide, un message l'indique en haut de la page.
+
+## Contenu interne
+
+Le contenu interne est tout ce que l'équipe écrit elle-même : la Une, les visites
+d'entrepôts, le calendrier, les congés et absences, les documents utiles. Il se saisit dans
+les onglets de la relecture (**Accueil → Contenu interne** ouvre directement l'onglet
+*Une* du dernier brouillon, ou la liste des mois s'il n'y en a pas).
+
+### Une
+
+L'onglet **Une** affiche les trois chiffres du mois : visites d'entrepôts, rendez-vous à
+venir, actualités retenues (rubriques 1 et 2). Ils sont **calculés automatiquement** à
+partir des autres onglets et ne se saisissent pas. Chaque chiffre mène à l'onglet qui le
+nourrit.
+
+### 3. Visites d'entrepôts
+
+1. **+ Ajouter une visite d'entrepôt**, puis remplissez **Site visité** et **Lieu**
+   (obligatoires), **Date de la visite**, **Propriétaire ou exploitant**, **Surface (m²)**
+   et une **Description courte**, puis **Ajouter la visite**. Pour corriger ensuite :
+   **Modifier** puis **Enregistrer la visite**.
+2. **Photos** : choisissez jusqu'à 3 photos (JPEG, PNG ou WebP, 15 Mo au plus chacune) puis
+   **Envoyer les photos**. Chaque photo est vérifiée en l'ouvrant, **redressée** selon
+   l'orientation de l'appareil, **débarrassée de ses métadonnées** (dont la position GPS),
+   réduite à 1600 px et enregistrée en JPEG dans `<données>\photos\<mois>\` sous un nom
+   généré par l'application. Une photo illisible ou trop lourde est refusée avec un
+   message ; les autres sont gardées.
+3. La première photo est la **photo principale** (c'est elle qui illustre la visite) :
+   **Choisir comme photo principale** sous une autre photo la fait passer en premier. Le
+   champ de légende puis **Enregistrer** ajoute un texte sous la photo. **Supprimer...**
+   retire la photo (confirmation demandée) et efface le fichier.
+4. **⤒ ↑ ↓ ⤓** ordonnent les visites ; **Supprimer...** efface une visite avec ses
+   photos, après confirmation.
+
+### 4. Calendrier
+
+**+ Ajouter un rendez-vous au calendrier** : **Titre** (obligatoire), **Date** et **Date
+de fin** (facultatives, la fin ne peut pas précéder le début), **Lieu**, **Résumé** (jusqu'à
+1 000 caractères, retours à la ligne conservés), puis **Ajouter**. **Classer par date**
+remet la liste dans l'ordre chronologique (les rendez-vous sans date passent en fin) ; les
+flèches permettent un ordre à la main.
+
+### 5. Congés et absences
+
+**+ Ajouter un congé ou une absence** : **Nom** et **Du** (obligatoires), **Au**
+(facultatif, jamais avant le début), **Motif** court (congés, formation, déplacement...),
+puis **Ajouter**. **Classer par date** et flèches comme pour le calendrier.
+
+### 6. Documents utiles
+
+Six liens au plus, chacun avec un **Libellé** (sinon « Voir le document ») et une
+**Adresse du document** qui doit commencer par `http://` ou `https://` (SharePoint, Drive,
+intranet...). **Enregistrer les liens** vérifie seulement le format des adresses :
+**l'application ne les ouvre jamais** (ils peuvent demander une connexion) ; testez-les
+vous-même avec **Ouvrir**. Une ligne vide est ignorée ; **Retirer tous les liens** vide la
+rubrique après confirmation.
+
+Comme pour les articles, un enregistrement refusé revient avec toute votre saisie et le
+message à côté du champ à corriger ; tout fonctionne sans JavaScript et au clavier.
 
 ## Transactions et surfaces
 
@@ -486,11 +549,12 @@ NewsProperty/
 │   ├── dates.py            # Noms de mois en français
 │   ├── security.py         # Clé secrète, jeton CSRF, contrôle du Host et de l'origine
 │   ├── bootstrap.py        # Migrations et synchronisation des acteurs au démarrage
-│   ├── models.py           # Dataclasses (Newsletter, Actor, Article, CollectionRun)
+│   ├── models.py           # Dataclasses (Newsletter, Actor, Article, CollectionRun,
+│   │                       # Visit, VisitPhoto, Event, Absence, DocumentLink)
 │   ├── actor_catalog.py    # Lecture et validation de config/acteurs.yaml
 │   ├── db/
 │   │   ├── connection.py   # Connexion SQLite, migrations, intégration Flask
-│   │   └── migrations/     # 0001_initial.sql...
+│   │   └── migrations/     # 0001_initial.sql, 0002_internal_content.sql...
 │   ├── repositories/       # Fonctions d'accès aux données, une par table principale
 │   ├── http_client.py      # Client HTTP poli (reprises, débit, robots.txt)
 │   ├── sources/
@@ -507,6 +571,7 @@ NewsProperty/
 │   │   └── views.py        # Pages web /collecte
 │   ├── detect/             # Détection : règles, phrases, transactions, surfaces, rapports
 │   ├── review/             # Relecture : limites, actions (service.py), pages (views.py)
+│   ├── content/            # Contenu interne : photos (photos.py), actions, pages
 │   ├── tools/
 │   │   ├── diagnose_sources.py  # Outil de diagnostic des sources
 │   │   ├── collect.py      # Collecte en ligne de commande
@@ -536,7 +601,8 @@ NewsProperty/
     ├── test_collect_runner.py
     ├── test_collect_web.py
     ├── test_detection.py   # dont les cas étiquetés de fixtures/detection_cases.yaml
-    └── test_review.py      # Interface de relecture
+    ├── test_review.py      # Interface de relecture
+    └── test_content.py     # Contenu interne (Une, visites et photos, calendrier...)
 ```
 
 ## Conventions de développement

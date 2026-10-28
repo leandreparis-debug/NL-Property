@@ -1,0 +1,34 @@
+{# Champs d'un événement du calendrier. Variables : p, e (événement ou None), edit, item_id. #}
+<div class="grid">
+  <div class="field field-wide">
+    <label for="{{ p }}-titre">Titre</label>
+    <input type="text" id="{{ p }}-titre" name="titre" maxlength="150" required placeholder="Ex. : Comité d'investissement, Salon SITL"
+           value="{{ val(edit, item_id, 'titre', e.title if e else '') }}" {{ invalid(edit, item_id, 'titre', p ~ '-titre-err') }}>
+    {{ error(edit, item_id, "titre", p ~ "-titre-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-date">Date (facultative)</label>
+    <input type="date" id="{{ p }}-date" name="date" value="{{ val(edit, item_id, 'date', date_value(e.event_date) if e else '') }}"
+           {{ invalid(edit, item_id, 'date', p ~ '-date-err') }}>
+    {{ error(edit, item_id, "date", p ~ "-date-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-date-fin">Date de fin (si plusieurs jours)</label>
+    <input type="date" id="{{ p }}-date-fin" name="date_fin" value="{{ val(edit, item_id, 'date_fin', date_value(e.end_date) if e else '') }}"
+           {{ invalid(edit, item_id, 'date_fin', p ~ '-date-fin-err') }}>
+    {{ error(edit, item_id, "date_fin", p ~ "-date-fin-err") }}
+  </div>
+  <div class="field">
+    <label for="{{ p }}-lieu">Lieu (facultatif)</label>
+    <input type="text" id="{{ p }}-lieu" name="lieu" maxlength="150"
+           value="{{ val(edit, item_id, 'lieu', e.location if e else '') }}" {{ invalid(edit, item_id, 'lieu', p ~ '-lieu-err') }}>
+    {{ error(edit, item_id, "lieu", p ~ "-lieu-err") }}
+  </div>
+  <div class="field field-wide">
+    <label for="{{ p }}-resume">Résumé (facultatif)</label>
+    <textarea id="{{ p }}-resume" name="resume" rows="5" maxlength="1000"
+              {{ invalid(edit, item_id, 'resume', p ~ '-resume-err') }}>{{ val(edit, item_id, 'resume', e.summary if e else '') }}</textarea>
+    <p class="help">Quelques phrases pour les équipes : objet, participants, ce qu'il faut préparer (1 000 caractères au plus). Les retours à la ligne sont conservés.</p>
+    {{ error(edit, item_id, "resume", p ~ "-resume-err") }}
+  </div>
+</div>
