@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import logging
 from datetime import date
+from pathlib import Path
 
 from flask import Flask, jsonify, render_template
 from flask.typing import ResponseReturnValue
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
+from news_property.bootstrap import prepare_database
 from news_property.config import Settings, load_settings
 from news_property.dates import format_month_fr
+from news_property.db import connection as db_connection
 from news_property.newsletter.views import bp as newsletter_bp
 from news_property.security import init_security
 from news_property.ui import ui_context
@@ -21,18 +24,26 @@ __all__ = ["__version__", "create_app"]
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Settings | None = None) -> Flask:
+def create_app(settings: Settings | None = None, actors_file: Path | None = None) -> Flask:
     """Crée et configure l'application Flask.
 
     Si settings est None, la configuration est chargée depuis l'environnement et .env.
     Les paramètres sont disponibles dans app.config["CP_SETTINGS"].
+
+    Au démarrage : applique les migrations manquantes de la base, puis synchronise le
+    référentiel des acteurs (actors_file, par défaut config/acteurs.yaml). Lève
+    MigrationError ou ActorCatalogError (messages en français) si l'un des deux échoue.
+    Chaque requête dispose ensuite de sa propre connexion (news_property.db.connection.get_db).
     """
     if settings is None:
         settings = load_settings()
 
+    prepare_database(settings, actors_file)
+
     app = Flask(__name__)
     app.config["CP_SETTINGS"] = settings
     app.config["DEBUG"] = settings.debug
+    db_connection.init_app(app)
     init_security(app, settings)
     app.register_blueprint(newsletter_bp)
 

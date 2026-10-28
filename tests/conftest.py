@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import socket
+import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -12,6 +13,9 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from news_property.config import Settings, load_settings
+from news_property.db.connection import get_connection, init_db
+from news_property.models import Newsletter
+from news_property.repositories import newsletters
 from tests.helpers import web_app
 
 
@@ -59,3 +63,18 @@ def app(settings: Settings) -> Flask:
 def client(app: Flask) -> FlaskClient:
     """Client HTTP de test."""
     return app.test_client()
+
+
+@pytest.fixture
+def conn(settings: Settings) -> Iterator[sqlite3.Connection]:
+    """Connexion à une base migrée, dans le dossier temporaire."""
+    init_db(settings)
+    connection = get_connection(settings)
+    yield connection
+    connection.close()
+
+
+@pytest.fixture
+def newsletter(conn: sqlite3.Connection) -> Newsletter:
+    """Newsletter d'octobre 2026."""
+    return newsletters.get_or_create(conn, "2026-10")

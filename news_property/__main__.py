@@ -10,6 +10,7 @@ import webbrowser
 
 from news_property import create_app
 from news_property.config import ConfigError, load_settings
+from news_property.db import DatabaseError
 from news_property.logging_setup import configure_logging
 from news_property.version import __version__
 
@@ -65,7 +66,7 @@ def main() -> int:
 
     try:
         app = create_app(settings)
-    except ConfigError as exc:
+    except (ConfigError, DatabaseError) as exc:
         logger.error("Démarrage impossible : %s", exc)
         return 2
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import date
+from pathlib import Path
 
 import pytest
 from flask import Flask
@@ -114,3 +115,40 @@ def test_menu_icons_stay_visible_on_the_sidebar() -> None:
     colors = _visible_on(("#8D2562", "#5E1741", "#E0B3CC"), "#5E1741")
     assert "#5E1741" not in colors
     assert all(contrast_ratio(color, "#5E1741") >= 2 for color in colors)
+
+
+def test_app_creates_database_with_actors(app: Flask, settings: Settings) -> None:
+    from contextlib import closing
+
+    from news_property.db.connection import current_version, db_path, get_connection
+    from news_property.db.connection import list_migrations as migrations
+    from news_property.repositories import actors
+
+    assert db_path(settings).is_file()
+    with closing(get_connection(settings)) as conn:
+        assert current_version(conn) == migrations()[-1].version
+        assert len(actors.list_all(conn, tracked_only=True)) >= 30
+
+
+def test_invalid_actors_file_prevents_startup(settings: Settings, tmp_path: Path) -> None:
+    from news_property import create_app
+    from news_property.actor_catalog import ActorCatalogError
+
+    bad = tmp_path / "acteurs.yaml"
+    bad.write_text("actors:\n  - name: A\n  - name: a\n", encoding="utf-8")
+    with pytest.raises(ActorCatalogError, match="ligne 3"):
+        create_app(settings, actors_file=bad)
+
+
+def test_one_connection_per_request_closed_at_teardown(app: Flask) -> None:
+    from flask import g
+
+    from news_property.db.connection import get_db
+
+    with app.app_context():
+        conn = get_db()
+        assert get_db() is conn
+        assert conn.execute("PRAGMA foreign_keys").fetchone()[0] == 1
+        assert "db" in g
+    with pytest.raises(Exception, match="closed"):
+        conn.execute("SELECT 1")

@@ -17,10 +17,11 @@ Rien n'est envoyé automatiquement : l'application prépare, l'humain envoie.
 Elle reprend l'architecture et les solutions éprouvées de l'application News Franchise
 (Carmila), sans son contenu.
 
-> **État actuel (étape 1 sur 10)** : socle technique (configuration, journal, sécurité,
-> page d'accueil, écran Thème aux couleurs du logo Carrefour Property). Les étapes
-> suivantes ajoutent la base de données, le diagnostic des sources, la collecte, la
-> détection, la relecture, le contenu interne, l'aperçu, l'e-mail et la démonstration.
+> **État actuel (étape 2 sur 10)** : socle technique (configuration, journal, sécurité,
+> page d'accueil, écran Thème aux couleurs du logo Carrefour Property), base de données
+> locale avec migrations et référentiel des acteurs suivis. Les étapes suivantes ajoutent
+> le diagnostic des sources, la collecte, la détection, la relecture, le contenu interne,
+> l'aperçu, l'e-mail et la démonstration.
 
 ## Prérequis
 
@@ -83,6 +84,49 @@ là encore, fiez-vous au chemin affiché au démarrage.
 Le journal de l'application se trouve dans `logs\news_property.log` (fichier rotatif :
 1 Mo × 5 fichiers). En cas d'erreur, le détail technique y est consigné ; il n'est jamais
 affiché dans le navigateur.
+
+## Données
+
+### Base de données
+
+Toutes les données de la newsletter (actualités retenues, contenu interne, historique des
+collectes) sont dans une base SQLite locale :
+
+```
+%LOCALAPPDATA%\NewsProperty\db\news_property.sqlite3
+```
+
+Elle est créée, puis mise à jour (migrations), automatiquement au lancement de
+l'application. Le schéma et les règles (aucun lien inventé, Une calculée à la volée...)
+sont décrits dans [`docs/data-model.md`](docs/data-model.md).
+
+### Sauvegarder
+
+1. Fermez l'application (fenêtre noire de `lancer.bat`).
+2. Copiez **tout le dossier** `%LOCALAPPDATA%\NewsProperty\db\` (et `photos\` pour les
+   photos) vers un emplacement de sauvegarde, par exemple Google Drive.
+
+Copiez le dossier entier, pas seulement le fichier `.sqlite3` : si l'application n'a pas
+été fermée proprement, les fichiers `-wal` et `-shm` qui l'accompagnent contiennent les
+dernières modifications. Pour restaurer, remettez le dossier à sa place, application fermée.
+
+### Modifier la liste des acteurs suivis
+
+Le référentiel des acteurs de l'immobilier logistique suivis (investisseurs et
+développeurs, logisticiens, chargeurs et distributeurs, conseils) est le fichier
+**`config\acteurs.yaml`** (nom, catégorie, autres écritures du nom). Pour le modifier :
+
+1. ouvrez-le avec le Bloc-notes et respectez l'indentation (2 espaces, pas de tabulation) ;
+2. ajoutez, corrigez ou retirez un acteur (champs `name`, `category`, `aliases`,
+   `case_sensitive`) ;
+3. relancez l'application : la base est synchronisée au démarrage.
+
+Un acteur retiré du fichier n'est jamais effacé de la base (son historique est conservé) :
+il n'est simplement plus suivi. En cas d'erreur dans le fichier (nom manquant, doublon,
+indentation), l'application ne démarre pas et indique la ligne et l'acteur fautifs.
+
+**À vérifier** : la liste livrée a été constituée sans liste fournie, à partir des acteurs
+connus du marché français. Ajoutez vos interlocuteurs, retirez les inutiles.
 
 ## Configuration
 
@@ -166,9 +210,11 @@ NewsProperty/
 ├── .gitattributes          # Fins de ligne (CRLF pour les .bat)
 ├── README.md
 ├── config/
+│   ├── acteurs.yaml        # Référentiel des acteurs suivis (immobilier logistique)
 │   ├── theme.yaml          # Charte graphique de la newsletter (couleurs du logo)
 │   └── assets/             # Logos Carrefour Property (couleurs, réserve blanche)
 ├── docs/
+│   ├── data-model.md       # Modèle de données et procédure de migration
 │   ├── theme.md            # Thème : origine des valeurs, clés modifiables
 │   └── securite.md         # CSRF, contrôle du Host, échappement, liens non modifiables
 ├── news_property/          # Code de l'application
@@ -178,6 +224,13 @@ NewsProperty/
 │   ├── logging_setup.py    # Journal rotatif + console
 │   ├── dates.py            # Noms de mois en français
 │   ├── security.py         # Clé secrète, jeton CSRF, contrôle du Host et de l'origine
+│   ├── bootstrap.py        # Migrations et synchronisation des acteurs au démarrage
+│   ├── models.py           # Dataclasses (Newsletter, Actor, Article, CollectionRun)
+│   ├── actor_catalog.py    # Lecture et validation de config/acteurs.yaml
+│   ├── db/
+│   │   ├── connection.py   # Connexion SQLite, migrations, intégration Flask
+│   │   └── migrations/     # 0001_initial.sql...
+│   ├── repositories/       # Fonctions d'accès aux données, une par table principale
 │   ├── ui.py               # Menu, cartes de l'accueil, variables du thème
 │   ├── fonts.py            # Police système pour les images générées
 │   ├── newsletter/         # Thème (theme.py), formes de la charte (shapes.py), pages
@@ -189,7 +242,10 @@ NewsProperty/
     ├── test_config.py
     ├── test_app.py
     ├── test_theme.py
-    └── test_security.py
+    ├── test_security.py
+    ├── test_db.py
+    ├── test_actors.py
+    └── test_repositories.py
 ```
 
 ## Conventions de développement

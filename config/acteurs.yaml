@@ -1,0 +1,162 @@
+# Référentiel des acteurs de l'immobilier logistique suivis par News Property.
+#
+# Chargé et synchronisé en base à chaque démarrage de l'application :
+# - un acteur ajouté ici est créé ;
+# - la catégorie et les alias sont mis à jour ;
+# - un acteur retiré n'est jamais effacé : il n'est simplement plus suivi.
+#
+# Un article de veille qui cite un acteur (nom ou alias) est classé en rubrique 2
+# « Les acteurs du marché » ; Google Actualités est interrogé pour chacun.
+#
+# Champs : name (obligatoire, unique), category (texte libre, ex. « Investisseur et
+# développeur »), aliases (autres écritures du nom, utilisées pour repérer l'acteur dans les
+# articles), case_sensitive (facultatif, false par défaut ; true exige la majuscule initiale
+# lors de la détection, pour les noms qui sont aussi des mots courants ou des sigles courts).
+# Un nom ou un alias ne peut désigner qu'un seul acteur (la casse, les accents et le type
+# d'apostrophe ne comptent pas pour cette vérification).
+#
+# LISTE À VÉRIFIER par l'utilisateur : elle a été constituée sans liste fournie, à partir
+# des acteurs connus du marché français. Ajoutez vos interlocuteurs, retirez les inutiles.
+# Modifiez ce fichier avec le Bloc-notes (2 espaces d'indentation, pas de tabulation).
+
+actors:
+  # ----- Investisseurs et développeurs d'entrepôts
+  - name: Prologis
+    category: Investisseur et développeur
+    aliases: []
+  - name: GLP
+    category: Investisseur et développeur
+    aliases: []
+    case_sensitive: true
+  - name: Segro
+    category: Investisseur et développeur
+    aliases: []
+  - name: Goodman
+    category: Investisseur et développeur
+    aliases: []
+    case_sensitive: true
+  - name: Panattoni
+    category: Investisseur et développeur
+    aliases: []
+  - name: Argan
+    category: Investisseur et développeur
+    aliases: []
+    case_sensitive: true
+  - name: P3 Logistic Parks
+    category: Investisseur et développeur
+    aliases: ["P3"]
+    case_sensitive: true
+  - name: Logicor
+    category: Investisseur et développeur
+    aliases: []
+  - name: Barjane
+    category: Investisseur et développeur
+    aliases: []
+  - name: Virtuo
+    category: Investisseur et développeur
+    aliases: ["Virtuo Industrial Property"]
+  - name: Montea
+    category: Investisseur et développeur
+    aliases: []
+  - name: WDP
+    category: Investisseur et développeur
+    aliases: []
+    case_sensitive: true
+  - name: Mileway
+    category: Investisseur et développeur
+    aliases: []
+  - name: Faubourg Promotion
+    category: Investisseur et développeur
+    aliases: []
+  - name: Vailog
+    category: Investisseur et développeur
+    aliases: []
+  - name: Catella Logistic Europe
+    category: Investisseur et développeur
+    aliases: ["Catella"]
+  - name: AEW
+    category: Investisseur et développeur
+    aliases: []
+    case_sensitive: true
+
+  # ----- Logisticiens (prestataires)
+  - name: FM Logistic
+    category: Logisticien
+    aliases: []
+  - name: ID Logistics
+    category: Logisticien
+    aliases: []
+  - name: Geodis
+    category: Logisticien
+    aliases: []
+  - name: GXO
+    category: Logisticien
+    aliases: ["GXO Logistics"]
+  - name: XPO Logistics
+    category: Logisticien
+    aliases: ["XPO"]
+  - name: STEF
+    category: Logisticien
+    aliases: []
+    case_sensitive: true
+  - name: Kuehne+Nagel
+    category: Logisticien
+    aliases: ["Kuehne + Nagel", "Kühne+Nagel", "Kuehne Nagel"]
+  - name: DHL Supply Chain
+    category: Logisticien
+    aliases: ["DHL"]
+  - name: CEVA Logistics
+    category: Logisticien
+    aliases: ["Ceva"]
+  - name: Bolloré Logistics
+    category: Logisticien
+    aliases: []
+  - name: Heppner
+    category: Logisticien
+    aliases: []
+
+  # ----- Chargeurs et distributeurs (utilisateurs d'entrepôts)
+  - name: Carrefour
+    category: Chargeur et distributeur
+    aliases: ["Carrefour Supply Chain", "Carrefour Property", "Groupe Carrefour"]
+  - name: Amazon
+    category: Chargeur et distributeur
+    aliases: []
+  - name: E.Leclerc
+    category: Chargeur et distributeur
+    aliases: ["Leclerc", "E. Leclerc", "Scapnor", "Socamil"]
+  - name: Lidl
+    category: Chargeur et distributeur
+    aliases: []
+  - name: Aldi
+    category: Chargeur et distributeur
+    aliases: []
+  - name: Intermarché
+    category: Chargeur et distributeur
+    aliases: ["Les Mousquetaires", "Groupement Les Mousquetaires"]
+  - name: Auchan
+    category: Chargeur et distributeur
+    aliases: ["Auchan Retail"]
+
+  # ----- Conseils et commercialisateurs
+  - name: CBRE
+    category: Conseil
+    aliases: []
+  - name: JLL
+    category: Conseil
+    aliases: ["Jones Lang LaSalle"]
+  - name: Cushman & Wakefield
+    category: Conseil
+    aliases: ["Cushman and Wakefield", "Cushman"]
+  - name: BNP Paribas Real Estate
+    category: Conseil
+    aliases: ["BNPPRE", "BNP Paribas RE"]
+  - name: Arthur Loyd Logistique
+    category: Conseil
+    aliases: ["Arthur Loyd"]
+  - name: Savills
+    category: Conseil
+    aliases: []
+  - name: Knight Frank
+    category: Conseil
+    aliases: []
