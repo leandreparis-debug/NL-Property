@@ -15,6 +15,7 @@ import dataclasses
 import json
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import webbrowser
@@ -26,6 +27,7 @@ from typing import Any
 
 import yaml
 
+from news_property.collect.config import SOURCES_FILE, SourcesConfigError, load_sources
 from news_property.config import ConfigError, Settings, load_settings
 from news_property.http_client import Fetcher
 from news_property.logging_setup import configure_logging
@@ -433,7 +435,36 @@ def parse_args(argv: Sequence[str] | None) -> argparse.Namespace:
     )
     parser.add_argument("--no-google", action="store_true", help="ne pas tester Google Actualités")
     parser.add_argument("--open", action="store_true", help="ouvrir le rapport à la fin")
+    parser.add_argument(
+        "--install-proposal",
+        action="store_true",
+        help="sans nouveau diagnostic : copier la dernière proposition (sources.proposed.yaml) "
+        "vers config/sources.yaml, après vérification",
+    )
     return parser.parse_args(argv)
+
+
+def install_proposal(reports_dir: Path, target: Path = SOURCES_FILE) -> Path | None:
+    """Copie sources.proposed.yaml (dernier diagnostic) vers config/sources.yaml.
+
+    La proposition est d'abord relue par load_sources : rien n'est copié si elle est
+    invalide (SourcesConfigError). Un sources.yaml déjà présent est gardé en
+    sources.yaml.bak. Renvoie le chemin de la sauvegarde, ou None s'il n'y en avait pas.
+    Lève FileNotFoundError si aucune proposition n'existe.
+    """
+    proposal = reports_dir / "sources.proposed.yaml"
+    if not proposal.is_file():
+        raise FileNotFoundError(
+            f"Aucune proposition dans {reports_dir} : lancez d'abord le diagnostic."
+        )
+    load_sources(proposal)  # SourcesConfigError si le fichier est invalide
+    backup = None
+    if target.is_file():
+        backup = target.with_suffix(".yaml.bak")
+        shutil.copyfile(target, backup)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(proposal, target)
+    return backup
 
 
 def select_targets(
@@ -502,6 +533,18 @@ def main(
         return 2
     configure_logging(settings, console=False)
     logging.getLogger("httpx").setLevel(logging.WARNING)
+
+    if args.install_proposal:
+        try:
+            backup = install_proposal(settings.reports_dir)
+        except (FileNotFoundError, SourcesConfigError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        progress(f"Liste des sources installée : {SOURCES_FILE}")
+        if backup is not None:
+            progress(f"L'ancienne liste a été gardée en {backup.name}.")
+        progress("Vous pouvez lancer la collecte (collecter_veille.bat ou bouton Collecter).")
+        return 0
 
     try:
         targets = select_targets(args.only, args.no_google, sites, subjects)

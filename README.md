@@ -534,8 +534,10 @@ ouvrent bien le vrai article chez le lecteur.
    « exploitable » y sont activées (`enabled: true`) ; une source sans flux a `url: null`.
 2. Ajustez si besoin (`enabled: true/false`, `note`), sans inventer d'URL : chaque adresse
    doit venir du diagnostic.
-3. Copiez le fichier vers **`config\sources.yaml`** dans le dossier du projet. C'est ce
-   fichier que la collecte (étape 4) utilisera.
+3. À la fin de `diagnostiquer_sources.bat`, répondez **O** à la question « Utiliser cette
+   proposition comme liste de sources ? » : le fichier est vérifié puis copié en
+   **`config\sources.yaml`** (une liste déjà présente est gardée en `sources.yaml.bak`).
+   Vous pouvez aussi le copier vous-même. C'est ce fichier que la collecte utilise.
 
 Le format est documenté, champ par champ, dans `config/sources.example.yaml`.
 

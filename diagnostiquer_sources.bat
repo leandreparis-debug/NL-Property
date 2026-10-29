@@ -28,7 +28,20 @@ echo.
 "%VENV_PY%" -m news_property.tools.diagnose_sources --open %*
 if errorlevel 1 goto :err_run
 echo.
-echo Diagnostic terminé. Le rapport s'ouvre automatiquement.
+echo Diagnostic terminé. Le rapport s'ouvre automatiquement : relisez-le.
+echo.
+choice /C ON /N /M "Utiliser cette proposition comme liste de sources de la collecte (config\sources.yaml) ? [O/N] "
+if errorlevel 2 goto :skip_install
+"%VENV_PY%" -m news_property.tools.diagnose_sources --install-proposal
+if errorlevel 1 goto :err_run
+echo.
+pause
+exit /b 0
+
+:skip_install
+echo.
+echo Rien n'a été copié. Pour installer la proposition plus tard : relancez ce fichier,
+echo ou copiez vous-même sources.proposed.yaml (dossier reports des données) en config\sources.yaml.
 pause
 exit /b 0
 

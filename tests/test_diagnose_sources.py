@@ -10,6 +10,7 @@ import pytest
 import respx
 import yaml
 
+from news_property.collect.config import SourcesConfigError
 from news_property.config import Settings
 from news_property.http_client import Fetcher
 from news_property.sources.candidates import CandidateSite
@@ -171,3 +172,29 @@ def test_tool_crash_returns_non_zero(
     monkeypatch.setattr(diagnose_sources, "write_reports", boom)
     code, _ = _run(settings, fetcher, ["--no-google", "--only", "Site Interdit"])
     assert code == 1
+
+
+def test_install_proposal_copies_after_checking(
+    mock_http: respx.MockRouter, fetcher: Fetcher, settings: Settings, tmp_path: Path
+) -> None:
+    target = tmp_path / "config" / "sources.yaml"
+    # Sans diagnostic : rien à installer.
+    with pytest.raises(FileNotFoundError, match="lancez d'abord le diagnostic"):
+        diagnose_sources.install_proposal(settings.reports_dir, target)
+    _setup_routes(mock_http)
+    assert _run(settings, fetcher, [])[0] == 0
+    proposal = settings.reports_dir / "sources.proposed.yaml"
+
+    assert diagnose_sources.install_proposal(settings.reports_dir, target) is None
+    assert target.read_text(encoding="utf-8") == proposal.read_text(encoding="utf-8")
+    # Une liste déjà présente est sauvegardée avant d'être remplacée.
+    target.write_text("sites: []\n", encoding="utf-8")
+    backup = diagnose_sources.install_proposal(settings.reports_dir, target)
+    assert backup == tmp_path / "config" / "sources.yaml.bak"
+    assert backup.read_text(encoding="utf-8") == "sites: []\n"
+    assert target.read_text(encoding="utf-8") == proposal.read_text(encoding="utf-8")
+    # Une proposition invalide n'est jamais copiée.
+    proposal.write_text("sites: [\n", encoding="utf-8")
+    with pytest.raises(SourcesConfigError):
+        diagnose_sources.install_proposal(settings.reports_dir, target)
+    assert target.read_text(encoding="utf-8") != "sites: [\n"
