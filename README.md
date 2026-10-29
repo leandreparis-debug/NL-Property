@@ -537,7 +537,9 @@ ouvrent bien le vrai article chez le lecteur.
 3. À la fin de `diagnostiquer_sources.bat`, répondez **O** à la question « Utiliser cette
    proposition comme liste de sources ? » : le fichier est vérifié puis copié en
    **`config\sources.yaml`** (une liste déjà présente est gardée en `sources.yaml.bak`).
-   Vous pouvez aussi le copier vous-même. C'est ce fichier que la collecte utilise.
+   Si vous avez fermé la fenêtre, double-cliquez sur **`installer_sources.bat`** : il
+   installe la dernière proposition sans refaire le diagnostic. Vous pouvez aussi copier
+   le fichier vous-même. C'est ce fichier que la collecte utilise.
 
 Le format est documenté, champ par champ, dans `config/sources.example.yaml`.
 
@@ -594,6 +596,7 @@ NewsProperty/
 ├── lancer.bat              # Lancement en double-clic (crée/met à jour .venv)
 ├── tests.bat               # Lancement des tests
 ├── diagnostiquer_sources.bat # Diagnostic des sources de veille
+├── installer_sources.bat   # Installe la proposition du diagnostic en config/sources.yaml
 ├── collecter_veille.bat    # Collecte de la veille d'un mois
 ├── demo.bat                # Mois de démonstration (janvier 2000)
 ├── requirements.txt        # Dépendances d'exécution (versions exactes)
